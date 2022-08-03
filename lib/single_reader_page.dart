@@ -20,8 +20,8 @@ class SingleReaderPage extends StatefulWidget {
 class _SingleReaderPageState extends State<SingleReaderPage> {
   Timer? _timer;
   bool isOn = true;
-  int preassureIndex = 9;
-  int flowIndex = 11;
+  late int preassureIndex;
+  late int flowIndex;
 
   // void startTimer() async {
   //   Random rand = Random();
@@ -47,6 +47,8 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
 
   @override
   void initState() {
+    preassureIndex = widget.services[2].characteristics.indexWhere((element) => element.uuid == '3300c0b5-2369-4322-8296-5564f44850b3');
+    flowIndex = widget.services[2].characteristics.indexWhere((element) => element.uuid == '3300c0b5-2369-4322-8296-5564f44850b3');
     widget.services[2].characteristics[preassureIndex].setNotifyValue(true);
     widget.services[2].characteristics[flowIndex].setNotifyValue(true);
     // startTimer();
@@ -211,16 +213,7 @@ class DetailGaugeDial extends StatelessWidget {
               radius: 0.9,
               width: 0.1,
               color: Colors.transparent,
-              pointers: [
-                RadialNeedlePointer(
-                    value: value,
-                    thicknessStart: 20,
-                    thicknessEnd: 0,
-                    length: 0.6,
-                    knobRadiusAbsolute: 10,
-                    color: Colors.white,
-                    knobColor: Colors.white)
-              ],
+              pointers: [RadialNeedlePointer(value: value, thicknessStart: 20, thicknessEnd: 0, length: 0.6, knobRadiusAbsolute: 10, color: Colors.white, knobColor: Colors.white)],
               ticks: [
                 RadialTicks(interval: 20, alignment: RadialTickAxisAlignment.inside, color: Colors.white, length: 0.17, children: [
                   RadialTicks(

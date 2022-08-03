@@ -33,63 +33,63 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                 itemCount: service.characteristics.length,
                 itemBuilder: (context, index3) {
                   var characteristic = service.characteristics[index3];
-                  // print('included:  ${characteristic.descriptors.length}');
+                  print('characteristic:  ${characteristic.uuid}');
                   return ChangeNotifierProvider<ByteDataProvider>(
                     create: (context) => ByteDataProvider(characteristic),
                     builder: (context, child) {
                       var byteDataProvider = Provider.of<ByteDataProvider>(context);
                       return Column(
                         children: [
-                          byteDataProvider.characteristic.descriptors.isNotEmpty
-                              ? ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: byteDataProvider.characteristic.descriptors.length,
-                                  itemBuilder: (context, index2) {
-                                    var descriptor = characteristic.descriptors[index2];
-                                    // print('\n\n\n\n ############### incl ################ \n\n\n\n');
-                                    return Card(
-                                      // child: Text('Descripters: ${descriptor.uuid}'),
-                                      color: Colors.red,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          children: [
-                                            Text('${descriptor.uuid}'),
-                                            ElevatedButton(
-                                                onPressed: () {
-                                                  byteDataProvider.readDescriptor(index2);
-                                                },
-                                                child: const Text('Read')),
-                                            Text('${byteDataProvider.descriptorData[index2]}')
+                          // byteDataProvider.characteristic.descriptors.isNotEmpty
+                          //     ? ListView.builder(
+                          //         shrinkWrap: true,
+                          //         physics: const NeverScrollableScrollPhysics(),
+                          //         itemCount: byteDataProvider.characteristic.descriptors.length,
+                          //         itemBuilder: (context, index2) {
+                          //           var descriptor = characteristic.descriptors[index2];
+                          //           // print('\n\n\n\n ############### incl ################ \n\n\n\n');
+                          //           return Card(
+                          //             // child: Text('Descripters: ${descriptor.uuid}'),
+                          //             color: Colors.red,
+                          //             child: Padding(
+                          //               padding: const EdgeInsets.all(8.0),
+                          //               child: Column(
+                          //                 children: [
+                          //                   Text('${descriptor.uuid}'),
+                          //                   ElevatedButton(
+                          //                       onPressed: () {
+                          //                         byteDataProvider.readDescriptor(index2);
+                          //                       },
+                          //                       child: const Text('Read')),
+                          //                   Text('${byteDataProvider.descriptorData[index2]}')
 
-                                            // if (characteristic.properties.read)
-                                            //   FutureBuilder<List<int>?>(
-                                            //       future: descriptor.read(),
-                                            //       initialData: const [],
-                                            //       builder: (context, snap) {
-                                            //         try {
-                                            //           if (snap.hasError) {
-                                            //             return const Text('error');
-                                            //           } else if (!snap.hasData) {
-                                            //             return const Text('no data');
-                                            //           } else if (snap.connectionState == ConnectionState.waiting) {
-                                            //             return const Text('Loading');
-                                            //           }
-                                            //           print('\n\n\n\n ############### ${snap.data} ################ \n\n\n\n');
+                          //                   // if (characteristic.properties.read)
+                          //                   //   FutureBuilder<List<int>?>(
+                          //                   //       future: descriptor.read(),
+                          //                   //       initialData: const [],
+                          //                   //       builder: (context, snap) {
+                          //                   //         try {
+                          //                   //           if (snap.hasError) {
+                          //                   //             return const Text('error');
+                          //                   //           } else if (!snap.hasData) {
+                          //                   //             return const Text('no data');
+                          //                   //           } else if (snap.connectionState == ConnectionState.waiting) {
+                          //                   //             return const Text('Loading');
+                          //                   //           }
+                          //                   //           print('\n\n\n\n ############### ${snap.data} ################ \n\n\n\n');
 
-                                            //           return Text('${snap.data}');
-                                            //         } catch (e) {
-                                            //           return Text('$e');
-                                            //         }
-                                            //       }),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : const SizedBox.shrink(),
+                          //                   //           return Text('${snap.data}');
+                          //                   //         } catch (e) {
+                          //                   //           return Text('$e');
+                          //                   //         }
+                          //                   //       }),
+                          //                 ],
+                          //               ),
+                          //             ),
+                          //           );
+                          //         },
+                          //       )
+                          //     : const SizedBox.shrink(),
                           StreamProvider<List<int>>(
                               initialData: const [0],
                               create: (context) => characteristic.value,
@@ -144,8 +144,7 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                       print('Data parse: $bytesResult');
 
                                       String result = '--';
-                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' ||
-                                          characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2') {
+                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' || characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2') {
                                         result = String.fromCharCodes(bytes);
                                       } else {
                                         if (bytes.lengthInBytes == 192) {

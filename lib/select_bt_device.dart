@@ -110,6 +110,7 @@ class _SelectBtDeviceState extends State<SelectBtDevice> {
           FutureBuilder<BluetoothDevice?>(
               future: gettingConnection(connectDevice: connectDevice, disconnect: disconnect),
               builder: (context, snapshot) {
+                print(snapshot.data);
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -127,8 +128,7 @@ class _SelectBtDeviceState extends State<SelectBtDevice> {
                     children: [
                       SizedBox(height: 20),
                       const Text('Connected to', style: TextStyle(color: Colors.white54), textAlign: TextAlign.center),
-                      Text(snapshot.data!.name,
-                          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white70), textAlign: TextAlign.center),
+                      Text(snapshot.data!.name, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white70), textAlign: TextAlign.center),
                       TextButton(
                           onPressed: () {
                             setState(() {
@@ -174,15 +174,34 @@ class _SelectBtDeviceState extends State<SelectBtDevice> {
                 return StreamBuilder<List<ScanResult>>(
                     stream: flutterBlue.scanResults,
                     builder: (context, scanSnapshot) {
+                      print('scansnapsghot: ${scanSnapshot.data}');
                       if (scanSnapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
-                      }
-                      if (scanSnapshot.data == null) {
-                        return const Center(child: Text('Ingen enheder fundet.'));
                       }
                       allResults = scanSnapshot.data!;
                       var newResults = allResults.where((element) => element.device.name.contains('FloPro')).toList();
                       newResults.sort((a, b) => a.device.name.isEmpty ? 1 : a.device.name.compareTo(b.device.name.isEmpty ? 'zzzzz' : b.device.name));
+                      if (newResults.isEmpty) {
+                        return Column(
+                          children: [
+                            IconButton(
+                                onPressed: () async {
+                                  if (canRefresh) {
+                                    canRefresh = false;
+                                    await flutterBlue.stopScan();
+                                    await Future.delayed(
+                                        const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        () => _findPrinters());
+                                    canRefresh = true;
+                                  }
+                                },
+                                icon: const Icon(Icons.refresh)),
+                            const Center(child: Text('Ingen enheder fundet.')),
+                          ],
+                        );
+                      }
                       return Column(
                         children: [
                           IconButton(
