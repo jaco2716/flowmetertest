@@ -20,8 +20,9 @@ class SingleReaderPage extends StatefulWidget {
 class _SingleReaderPageState extends State<SingleReaderPage> {
   Timer? _timer;
   bool isOn = true;
-  late int preassureIndex;
-  late int flowIndex;
+  late BluetoothService dataService;
+  late BluetoothCharacteristic pressureCharacteristic;
+  late BluetoothCharacteristic flowCharacteristic;
 
   // void startTimer() async {
   //   Random rand = Random();
@@ -44,14 +45,25 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
   //     },
   //   );
   // }
+  void setupService() async {
+    int serviceIndex = widget.services.indexWhere((element) => element.uuid.toString() == '8d8cceb9-ec48-4621-b293-0bafb0e0fa2d');
+    dataService = widget.services[serviceIndex];
+    int preassureIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '3300c0b5-2369-4322-8296-5564f44850b3');
+    int flowIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '951770bd-a550-4466-b16f-4bc3170f4d0e');
+    pressureCharacteristic = dataService.characteristics[preassureIndex];
+    flowCharacteristic = dataService.characteristics[flowIndex];
+    if (!pressureCharacteristic.isNotifying) {
+      await pressureCharacteristic.setNotifyValue(true);
+    }
+    if (!flowCharacteristic.isNotifying) {
+      await flowCharacteristic.setNotifyValue(true);
+    }
+  }
 
   @override
   void initState() {
-    preassureIndex = widget.services[2].characteristics.indexWhere((element) => element.uuid == '3300c0b5-2369-4322-8296-5564f44850b3');
-    flowIndex = widget.services[2].characteristics.indexWhere((element) => element.uuid == '3300c0b5-2369-4322-8296-5564f44850b3');
-    widget.services[2].characteristics[preassureIndex].setNotifyValue(true);
-    widget.services[2].characteristics[flowIndex].setNotifyValue(true);
     // startTimer();
+    setupService();
     super.initState();
   }
 
@@ -73,7 +85,8 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => SingleChartPage(
-                              services: widget.services,
+                              pressureCharacteristic: pressureCharacteristic,
+                              flowCharacteristic: flowCharacteristic,
                             )));
               },
               icon: const Icon(Icons.bar_chart_rounded))
@@ -119,7 +132,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
               StreamBuilder<List<int>>(
                   initialData: [0, 0, 0, 0],
                   // stream: widget.services[2].characteristics.firstWhere((element) => element.uuid == '3300c0b5-2369-4322-8296-5564f44850b3').value,
-                  stream: widget.services[2].characteristics[preassureIndex].value,
+                  stream: pressureCharacteristic.value,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       // return Text('${snapshot.data}');
@@ -144,7 +157,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
               StreamBuilder<List<int>>(
                   // initialData: [0, 0, 0, 0],
                   // stream: widget.services[2].characteristics.firstWhere((element) => element.uuid == '3300c0b5-2369-4322-8296-5564f44850b3').value,
-                  stream: widget.services[2].characteristics[flowIndex].value,
+                  stream: flowCharacteristic.value,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       // return Text('${snapshot.data}');
@@ -154,7 +167,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                       var bytes = Uint8List.fromList(snapshot.data!);
                       var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
                       // TODO: do something with the data
-                      return SizedBox(height: 280, child: DetailGaugeDial(value: ((numberValue) / 100 * 4), isPressure: false));
+                      return SizedBox(height: 280, child: DetailGaugeDial(value: ((numberValue) / 1000), isPressure: false));
                     } else if (snapshot.hasError) {
                       // TODO: do something with the error
                       return Text(snapshot.error.toString());

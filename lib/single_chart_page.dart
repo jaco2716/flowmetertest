@@ -8,20 +8,22 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'package:provider/provider.dart';
 
 class SingleChartPage extends StatefulWidget {
-  final List<BluetoothService> services;
+  final BluetoothCharacteristic pressureCharacteristic;
+  final BluetoothCharacteristic flowCharacteristic;
 
-  const SingleChartPage({Key? key, required this.services}) : super(key: key);
+  const SingleChartPage({Key? key, required this.pressureCharacteristic, required this.flowCharacteristic}) : super(key: key);
 
   @override
   State<SingleChartPage> createState() => _SingleChartPageState();
 }
 
 class _SingleChartPageState extends State<SingleChartPage> {
-  final int flowIndex = 11;
-  final int preassureIndex = 9;
   int dataindex = 0;
   double minY = 0;
   double maxY = 0;
+  double dataValue = 0;
+  bool loading = false;
+
   List<Stream<List<int>>> streams = [];
   List<FlSpot> dataValues = [];
   final List<Color> gradientColors = [
@@ -37,8 +39,8 @@ class _SingleChartPageState extends State<SingleChartPage> {
   void initState() {
     // TODO: implement initState
     streams = [
-      widget.services[2].characteristics[flowIndex].value.asBroadcastStream(),
-      widget.services[2].characteristics[preassureIndex].value.asBroadcastStream(),
+      widget.flowCharacteristic.value.asBroadcastStream(),
+      widget.pressureCharacteristic.value.asBroadcastStream(),
     ];
     super.initState();
   }
@@ -71,11 +73,16 @@ class _SingleChartPageState extends State<SingleChartPage> {
                     // ),
                     onChanged: (SelectType? newValue) {
                       if (newValue != null) {
+                        loading = true;
+
                         context.read<SelectTypeListProvider>().changeSelected(newValue.id);
-                        dataValues = [];
-                        maxY = 0;
-                        minY = 0;
-                        dataindex = 0;
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          maxY = 0;
+                          minY = 0;
+                          dataindex = 0;
+                          dataValues = [];
+                          loading = false;
+                        });
                       }
                     },
                     items: selectTypeListProvider.selectType.map<DropdownMenuItem<SelectType>>((SelectType value) {
@@ -105,25 +112,32 @@ class _SingleChartPageState extends State<SingleChartPage> {
                         if (snapshot.hasData) {
                           // return Text('${snapshot.data}');
                           if (snapshot.data?.length != 4) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const AspectRatio(
+                              aspectRatio: 0.8,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
                           }
                           var bytes = Uint8List.fromList(snapshot.data!);
                           var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
-                          double finalDouble;
 
                           if (context.read<SelectTypeListProvider>().indexSelected == 0) {
                             // if (selectTypeListProvider.indexSelected == 0) {
-                            finalDouble = (numberValue) / 100;
+                            dataValue = (numberValue) / 10000;
                           } else {
-                            finalDouble = (numberValue - 1009000) / 1000;
+                            dataValue = (numberValue - 1009000) / 1000;
                           }
-                          dataValues.add(FlSpot(dataindex.toDouble(), finalDouble));
+                          dataValues.add(FlSpot(dataindex.toDouble(), dataValue));
                           if (dataValues.length > 60) {
                             dataValues.removeAt(0);
                           }
 
-                          maxY = dataValues.reduce((curr, next) => curr.y < next.y ? curr : next).y;
+                          minY = dataValues.reduce((curr, next) => curr.y < next.y ? curr : next).y;
                           maxY = dataValues.reduce((curr, next) => curr.y > next.y ? curr : next).y;
+                          print('max: $maxY');
+                          print('min: $minY');
+
                           // if (minY > finalDouble || dataindex < 1) {
                           //   minY = finalDouble;
                           // }
@@ -132,93 +146,104 @@ class _SingleChartPageState extends State<SingleChartPage> {
                           // }
 
                           dataindex++;
-                          return AspectRatio(
-                            aspectRatio: 0.8,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(18),
-                                ),
-                                // color: Color(0xff232d37),
+                          return Column(
+                            children: [
+                              const SizedBox(height: 20),
+                              Text(
+                                loading ? '' : '$dataValue',
+                                style: const TextStyle(fontSize: 25, color: Color(0xff23b6e6)),
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 18.0, left: 12.0, top: 24, bottom: 12),
-                                child: LineChart(
-                                  LineChartData(
-                                    gridData: FlGridData(
-                                      show: true,
-                                      drawVerticalLine: true,
-                                      horizontalInterval: 1,
-                                      verticalInterval: 1,
-                                      getDrawingHorizontalLine: (value) {
-                                        return FlLine(
-                                          color: const Color(0xff37434d),
-                                          strokeWidth: 1,
-                                        );
-                                      },
-                                      getDrawingVerticalLine: (value) {
-                                        return FlLine(
-                                          color: const Color(0xff37434d),
-                                          strokeWidth: 1,
-                                        );
-                                      },
-                                    ),
-                                    titlesData: FlTitlesData(
-                                      show: true,
-                                      rightTitles: AxisTitles(
-                                        sideTitles: SideTitles(showTitles: false),
-                                      ),
-                                      topTitles: AxisTitles(
-                                        sideTitles: SideTitles(showTitles: false),
-                                      ),
-                                      bottomTitles: AxisTitles(
-                                        axisNameWidget: const Text(
-                                          'Time',
-                                          style: TextStyle(color: Colors.white54, fontSize: 16),
+                              AspectRatio(
+                                aspectRatio: 0.8,
+                                child: loading
+                                    ? const Center(child: CircularProgressIndicator())
+                                    : Container(
+                                        decoration: const BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(18),
+                                          ),
+                                          // color: Color(0xff232d37),
                                         ),
-                                        axisNameSize: 30,
-                                      ),
-                                      leftTitles: AxisTitles(
-                                        sideTitles: SideTitles(
-                                          showTitles: true,
-                                          // interval: (maxY.ceil() + 1) / 4,
-                                          interval: calculateInterval(maxY, minY),
-                                          getTitlesWidget: leftTitleWidgets,
-                                          reservedSize: 42,
-                                        ),
-                                      ),
-                                    ),
-                                    borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xff37434d), width: 1)),
-                                    minX: dataValues.first.x,
-                                    maxX: dataValues.first.x + 60,
-                                    minY: minY - (maxY / 20 + 0.5),
-                                    maxY: maxY + (maxY / 20 + 0.5),
-                                    lineBarsData: [
-                                      LineChartBarData(
-                                        spots: dataValues,
-                                        isCurved: true,
-                                        gradient: LinearGradient(
-                                          colors: gradientColors,
-                                          begin: Alignment.centerLeft,
-                                          end: Alignment.centerRight,
-                                        ),
-                                        barWidth: 2,
-                                        isStrokeCapRound: true,
-                                        dotData: FlDotData(show: false),
-                                        belowBarData: BarAreaData(
-                                          show: true,
-                                          gradient: LinearGradient(
-                                            colors: gradientColors.map((color) => color.withOpacity(0.3)).toList(),
-                                            begin: Alignment.centerLeft,
-                                            end: Alignment.centerRight,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 4.0, left: 6.0, top: 8, bottom: 8),
+                                          child: LineChart(
+                                            LineChartData(
+                                              gridData: FlGridData(
+                                                show: true,
+                                                drawVerticalLine: true,
+                                                horizontalInterval: 1,
+                                                verticalInterval: 1,
+                                                getDrawingHorizontalLine: (value) {
+                                                  return FlLine(
+                                                    color: const Color(0xff37434d),
+                                                    strokeWidth: 1,
+                                                  );
+                                                },
+                                                getDrawingVerticalLine: (value) {
+                                                  return FlLine(
+                                                    color: const Color(0xff37434d),
+                                                    strokeWidth: 1,
+                                                  );
+                                                },
+                                              ),
+                                              titlesData: FlTitlesData(
+                                                show: true,
+                                                rightTitles: AxisTitles(
+                                                  sideTitles: SideTitles(showTitles: false),
+                                                ),
+                                                topTitles: AxisTitles(
+                                                  sideTitles: SideTitles(showTitles: false),
+                                                ),
+                                                bottomTitles: AxisTitles(
+                                                  axisNameWidget: const Text(
+                                                    'Time',
+                                                    style: TextStyle(color: Colors.white54, fontSize: 16),
+                                                  ),
+                                                  axisNameSize: 30,
+                                                ),
+                                                leftTitles: AxisTitles(
+                                                  sideTitles: SideTitles(
+                                                    showTitles: true,
+                                                    // interval: (maxY.ceil() + 1) / 4,
+                                                    interval: calculateInterval(maxY, minY),
+                                                    getTitlesWidget: leftTitleWidgets,
+                                                    reservedSize: 42,
+                                                  ),
+                                                ),
+                                              ),
+                                              borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xff37434d), width: 1)),
+                                              minX: dataValues.first.x,
+                                              maxX: dataValues.first.x + 60,
+                                              minY: minY - ((maxY - minY) / 10 + .5),
+                                              maxY: maxY + ((maxY - minY) / 10 + .5),
+                                              lineBarsData: [
+                                                LineChartBarData(
+                                                  spots: dataValues,
+                                                  isCurved: true,
+                                                  gradient: LinearGradient(
+                                                    colors: gradientColors,
+                                                    begin: Alignment.centerLeft,
+                                                    end: Alignment.centerRight,
+                                                  ),
+                                                  barWidth: 2,
+                                                  isStrokeCapRound: true,
+                                                  dotData: FlDotData(show: false),
+                                                  belowBarData: BarAreaData(
+                                                    show: true,
+                                                    gradient: LinearGradient(
+                                                      colors: gradientColors.map((color) => color.withOpacity(0.3)).toList(),
+                                                      begin: Alignment.centerLeft,
+                                                      end: Alignment.centerRight,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
                               ),
-                            ),
+                            ],
                           );
                         } else if (snapshot.hasError) {
                           // TODO: do something with the error
@@ -227,18 +252,6 @@ class _SingleChartPageState extends State<SingleChartPage> {
                         // TODO: the data is not ready, show a loading indicator
                         return const Center(child: CircularProgressIndicator());
                       }),
-                  IntrinsicHeight(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        CircleAvatar(radius: 10, backgroundColor: Colors.blue),
-                        Padding(padding: EdgeInsets.all(8.0), child: Text('Pressure')),
-                        VerticalDivider(width: 30),
-                        CircleAvatar(radius: 10, backgroundColor: Colors.orange),
-                        Padding(padding: EdgeInsets.all(8.0), child: Text('Flow')),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 30),
                   ElevatedButton.icon(onPressed: () {}, icon: const Icon(Icons.save), label: const Text('Save as Excell')),
                   const SizedBox(height: 20),
@@ -283,17 +296,21 @@ class _SingleChartPageState extends State<SingleChartPage> {
 
   double calculateInterval(double maxY, double minY) {
     // return 10 * (80 / 100);
+    double interval;
+    // if (maxY == minY) return 1;
     if (maxY - minY < 1) {
-      return 0.1;
+      interval = 0.1;
     } else if (maxY - minY < 5) {
-      return 0.5;
+      interval = 0.5;
     } else if (maxY - minY < 20) {
-      return 1;
+      interval = 1;
     } else if (maxY - minY < 50) {
-      return 5;
+      interval = 5;
     } else {
-      return (5 * (maxY - minY / 50).round()).toDouble();
+      interval = (5 * ((maxY - minY) / 50).round()).toDouble();
     }
+    print('interval: $interval');
+    return interval;
   }
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
@@ -308,7 +325,7 @@ class _SingleChartPageState extends State<SingleChartPage> {
     if (remain > 0) {
       return Text(
         '$text →',
-        style: TextStyle(fontSize: 10, color: Colors.white30),
+        style: const TextStyle(fontSize: 10, color: Colors.white30),
       );
     }
     return Text(intText, style: style, textAlign: TextAlign.left);

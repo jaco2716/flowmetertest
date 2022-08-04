@@ -11,7 +11,7 @@ class MyAlertDialog extends StatelessWidget {
   final bool onlyAction;
   final Color? confirmColor;
 
-  final Widget? widgetContext;
+  final Widget? widgetContent;
 
   const MyAlertDialog({
     Key? key,
@@ -22,12 +22,11 @@ class MyAlertDialog extends StatelessWidget {
     this.myOnPressed,
     this.infoDialog = true,
     this.onlyAction = false,
-    this.widgetContext,
+    this.widgetContent,
     this.confirmColor,
   }) : super(key: key);
 
-  final TextStyle _titleText =
-      const TextStyle(fontSize: 22, fontWeight: FontWeight.bold);
+  final TextStyle _titleText = const TextStyle(fontSize: 22, fontWeight: FontWeight.bold);
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +51,7 @@ class MyAlertDialog extends StatelessWidget {
           : null,
       content: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: widgetContext ??
+        child: widgetContent ??
             Text(
               message,
               textAlign: TextAlign.center,
@@ -99,8 +98,7 @@ class MyAlertDialog extends StatelessWidget {
                           child: Text(
                             finalConfirmText,
                           ),
-                          onPressed: () =>
-                              myOnPressed != null ? myOnPressed!() : null,
+                          onPressed: () => myOnPressed != null ? myOnPressed!() : null,
                         ),
                       ),
                     ),
@@ -135,7 +133,7 @@ Future<T?> showMyDialog<T>(
   void Function()? myOnPressed,
   bool infoDialog = true,
   bool onlyAction = false,
-  Widget? widgetContext,
+  Widget? widgetContent,
   BuildContext? specificContext,
   bool barrierDismissible = true,
   Color? confirmColor,
@@ -153,7 +151,7 @@ Future<T?> showMyDialog<T>(
         onlyAction: onlyAction,
         message: message,
         myOnPressed: myOnPressed,
-        widgetContext: widgetContext,
+        widgetContent: widgetContent,
         confirmColor: confirmColor,
       );
     },

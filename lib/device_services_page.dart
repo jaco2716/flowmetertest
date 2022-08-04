@@ -33,7 +33,9 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                 itemCount: service.characteristics.length,
                 itemBuilder: (context, index3) {
                   var characteristic = service.characteristics[index3];
-                  print('characteristic:  ${characteristic.uuid}');
+                  // print('characteristic :  ${characteristic.uuid}');
+                  print('Service :  ${service.uuid}');
+
                   return ChangeNotifierProvider<ByteDataProvider>(
                     create: (context) => ByteDataProvider(characteristic),
                     builder: (context, child) {
@@ -110,14 +112,25 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                                   // var sub = characteristic.value.listen((value) {
                                                   //   readValues[characteristic.uuid] = value;
                                                   // });
-                                                  await characteristic.read();
+                                                  var data = await characteristic.read();
+                                                  print(data);
+                                                  print(utf8.decode(data, allowMalformed: true));
+                                                  // print(utf8.encode('needlite'));
+
                                                   // sub.cancel();
                                                 }
                                               : null,
                                           child: const Text('  Read  '),
                                         ),
                                         ElevatedButton(
-                                          onPressed: characteristic.properties.write ? () {} : null,
+                                          onPressed: characteristic.properties.write
+                                              ? () {
+                                                  // Write flopro date
+                                                  //  characteristic.write([208, 7, 1, 1, 2, 50, 58, 7, 0, 0]);
+                                                  characteristic.write([110, 101, 101, 100, 108, 105, 116, 101]);
+                                                  // characteristic.write([50, 10, 6, 2]);
+                                                }
+                                              : null,
                                           child: const Text('  Write  '),
                                         ),
                                         ElevatedButton(
@@ -132,6 +145,7 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                           onPressed: characteristic.properties.notify
                                               ? () {
                                                   characteristic.setNotifyValue(false);
+                                                  print('charac :  ${characteristic.uuid}');
                                                 }
                                               : null,
                                           child: const Text('  Stop  '),
@@ -141,10 +155,9 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                     Consumer<List<int>>(builder: (context, List<int> data, _) {
                                       var bytes = Uint8List.fromList(data);
                                       var bytesResult = utf8.decode(bytes, allowMalformed: true);
-                                      print('Data parse: $bytesResult');
-
+                                      // print('Data parse: $bytesResult');
                                       String result = '--';
-                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' || characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2') {
+                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' || characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2' || characteristic.uuid.toString() == '00002a00-0000-1000-8000-00805f9b34fb') {
                                         result = String.fromCharCodes(bytes);
                                       } else {
                                         if (bytes.lengthInBytes == 192) {
