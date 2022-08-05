@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flowprotest/model/providers/byte_data_provider.dart';
 import 'package:intl/intl.dart';
@@ -15,8 +16,11 @@ class DeviceServicesPage extends StatefulWidget {
 }
 
 class _DeviceServicesPageState extends State<DeviceServicesPage> {
+  List<List<int>> datasamples = [];
+
   @override
   Widget build(BuildContext context) {
+    // print('69, 39, =  ${ByteData.view(Uint8List.fromList([69, 39, 68, 39]).buffer).get(0, Endian.host)}');
     return Scaffold(
       appBar: AppBar(title: const Text('Services')),
       body: ListView.builder(
@@ -34,7 +38,7 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                 itemBuilder: (context, index3) {
                   var characteristic = service.characteristics[index3];
                   // print('characteristic :  ${characteristic.uuid}');
-                  print('Service :  ${service.uuid}');
+                  // print('Service :  ${service.uuid}');
 
                   return ChangeNotifierProvider<ByteDataProvider>(
                     create: (context) => ByteDataProvider(characteristic),
@@ -113,10 +117,33 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                                   //   readValues[characteristic.uuid] = value;
                                                   // });
                                                   var data = await characteristic.read();
-                                                  print(data);
-                                                  print(utf8.decode(data, allowMalformed: true));
-                                                  // print(utf8.encode('needlite'));
+                                                  // var bytes = Uint8List.fromList([230, 7, 8, 5, 13, 12, 16, 5, 0, 0]);
+                                                  var bytes = Uint8List.fromList(data);
+                                                  // var yearValue = ByteData.view(bytes.buffer).getInt16(3, Endian.host);
+                                                  // DateTime date = DateTime(yearValue, bytes[2 + 3], bytes[3 + 3], bytes[4 + 3], bytes[5 + 3], bytes[6 + 3]);
+                                                  // var df = DateFormat('HH:mm:ss - dd/MM/yyyy');
+                                                  // int start = 14;
+                                                  // // print(data);
+                                                  print(bytes);
+                                                  // datasamples.add(data);
+                                                  // print('Test date: ${df.format(date)}');
+                                                  // int value = 2500;
+                                                  // print('$value    = ${Uint8List(2)..buffer.asInt16List()[0] = value}');
+                                                  // int end = 14;
+                                                  // log('$datasamples');
 
+                                                  // print('208, 7 = ${ByteData.view(Uint8List.fromList([60, 0]).buffer).getInt16(0, Endian.host)}');
+                                                  // print('${bytes.sublist(start, start + 4)} = ${ByteData.view(Uint8List.fromList(data).buffer).getInt32(start, Endian.host)}');
+
+                                                  // print(utf8.decode(bytes.sublist(0, 3), allowMalformed: true));
+                                                  // String text = 'LPG';
+                                                  // print('$text = ${utf8.encode('text')}');
+//0-2 = unknown
+//3-9 = time/date
+//10-11 = Data Sample Rate
+//10-11 = Data Sample Rate
+//10-11 = Data Sample Rate
+//10-11 = Data Sample Rate
                                                   // sub.cancel();
                                                 }
                                               : null,
@@ -124,11 +151,16 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                         ),
                                         ElevatedButton(
                                           onPressed: characteristic.properties.write
-                                              ? () {
+                                              ? () async {
                                                   // Write flopro date
                                                   //  characteristic.write([208, 7, 1, 1, 2, 50, 58, 7, 0, 0]);
-                                                  characteristic.write([110, 101, 101, 100, 108, 105, 116, 101]);
-                                                  // characteristic.write([50, 10, 6, 2]);
+                                                  // characteristic.write([110, 101, 101, 100, 108, 105, 116, 101]);
+                                                  try {
+                                                    await characteristic.write([1]);
+                                                  } on Exception catch (e) {
+                                                    print(e.toString());
+                                                  }
+                                                  print('done');
                                                 }
                                               : null,
                                           child: const Text('  Write  '),
@@ -145,7 +177,7 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                           onPressed: characteristic.properties.notify
                                               ? () {
                                                   characteristic.setNotifyValue(false);
-                                                  print('charac :  ${characteristic.uuid}');
+                                                  // print('charac :  ${characteristic.uuid}');
                                                 }
                                               : null,
                                           child: const Text('  Stop  '),
@@ -161,26 +193,31 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                         result = String.fromCharCodes(bytes);
                                       } else {
                                         if (bytes.lengthInBytes == 192) {
-                                          int bytelength = 2;
-                                          List<Uint8List> listlistbytes = [];
-                                          for (var i = 0; i < 192 / bytelength; i++) {
-                                            listlistbytes.add(Uint8List(bytelength));
-                                            for (var j = 0; j < bytelength; j++) {
-                                              listlistbytes[i][j] = data[(i + 1) * j];
-                                            }
-                                          }
-                                          List<int> resultList = [];
-                                          for (var i = 0; i < 192 / bytelength; i++) {
-                                            resultList.add(ByteData.view(listlistbytes[i].buffer).getInt16(0, Endian.host));
-                                          }
-                                          // var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
-                                          // print('32bit - Lenght: ${bytes.lengthInBytes}, Value: $numberValue');
-                                          // print(data);
-                                          result = '$resultList';
+                                          result = '$data';
+                                          // int bytelength = 2;
+                                          // List<Uint8List> listlistbytes = [];
+                                          // for (var i = 0; i < 192 / bytelength; i++) {
+                                          //   listlistbytes.add(Uint8List(bytelength));
+                                          //   for (var j = 0; j < bytelength; j++) {
+                                          //     listlistbytes[i][j] = data[(i + 1) * j];
+                                          //   }
+                                          // }
+                                          // List<int> resultList = [];
+                                          // for (var i = 0; i < 192 / bytelength; i++) {
+                                          //   resultList.add(ByteData.view(listlistbytes[i].buffer).getInt16(0, Endian.host));
+                                          // }
+                                          // // var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
+                                          // // print('32bit - Lenght: ${bytes.lengthInBytes}, Value: $numberValue');
+                                          // // print(data);
+                                          // result = '$resultList';
                                         } else if (bytes.lengthInBytes == 10) {
+                                          var bytes2 = Uint8List.fromList([16, 10, 0, 208, 7, 1, 1, 4, 32, 13]);
+                                          var yearValue2 = ByteData.view(bytes2.buffer).getInt16(0, Endian.host);
+                                          DateTime date2 = DateTime(yearValue2, bytes2[2], bytes2[3], bytes2[4], bytes2[5], bytes2[6]);
                                           var yearValue = ByteData.view(bytes.buffer).getInt16(0, Endian.host);
                                           DateTime date = DateTime(yearValue, bytes[2], bytes[3], bytes[4], bytes[5], bytes[6]);
                                           var df = DateFormat('HH:mm:ss - dd/MM/yyyy');
+                                          print('Test date: ${df.format(date2)}');
                                           // print('32bit - Lenght: ${bytes.lengthInBytes}, Value: $numberValue');
                                           // print(yearValue);
 
