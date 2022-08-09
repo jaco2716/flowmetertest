@@ -6,6 +6,7 @@ import 'package:flowprotest/single_chart_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:gauges/gauges.dart';
+import 'package:intl/intl.dart';
 
 class SingleReaderPage extends StatefulWidget {
   final List<BluetoothService> services;
@@ -21,42 +22,33 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
   Timer? _timer;
   bool isOn = true;
   late BluetoothService dataService;
+  late BluetoothService timeService;
   late BluetoothCharacteristic pressureCharacteristic;
   late BluetoothCharacteristic flowCharacteristic;
+  late BluetoothCharacteristic timeCharacteristic;
+  List<List<int>> dateData = [];
+  bool isNotifying = false;
 
-  // void startTimer() async {
-  //   Random rand = Random();
-  //   _timer = Timer.periodic(
-  //     const Duration(seconds: 10),
-  //     (Timer timer) {
-  //       setState(() {
-  //         for (var i = 0; i < widget.values.length; i++) {
-  //           if (widget.values[i] < 5) {
-  //             widget.values[i] += rand.nextInt(15) + 10;
-  //           } else if (widget.values[i] > 95) {
-  //             widget.values[i] -= rand.nextInt(15);
-  //           } else if (widget.values[i] < 40) {
-  //             widget.values[i] += rand.nextInt(15) + 5;
-  //           } else {
-  //             widget.values[i] += rand.nextInt(10) - 5;
-  //           }
-  //         }
-  //       });
-  //     },
-  //   );
-  // }
   void setupService() async {
+    int timeServiceIndex = widget.services.indexWhere((element) => element.uuid.toString() == '00001805-0000-1000-8000-00805f9b34fb');
+    timeService = widget.services[timeServiceIndex];
+    int timeIndex = timeService.characteristics.indexWhere((element) => element.uuid.toString() == '00002a2b-0000-1000-8000-00805f9b34fb');
+    timeCharacteristic = timeService.characteristics[timeIndex];
+
     int serviceIndex = widget.services.indexWhere((element) => element.uuid.toString() == '8d8cceb9-ec48-4621-b293-0bafb0e0fa2d');
     dataService = widget.services[serviceIndex];
     int preassureIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '3300c0b5-2369-4322-8296-5564f44850b3');
-    int flowIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '951770bd-a550-4466-b16f-4bc3170f4d0e');
     pressureCharacteristic = dataService.characteristics[preassureIndex];
+    int flowIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '951770bd-a550-4466-b16f-4bc3170f4d0e');
     flowCharacteristic = dataService.characteristics[flowIndex];
+    if (!timeCharacteristic.isNotifying) {
+      await timeCharacteristic.setNotifyValue(isNotifying);
+    }
     if (!pressureCharacteristic.isNotifying) {
-      await pressureCharacteristic.setNotifyValue(true);
+      await pressureCharacteristic.setNotifyValue(isNotifying);
     }
     if (!flowCharacteristic.isNotifying) {
-      await flowCharacteristic.setNotifyValue(true);
+      await flowCharacteristic.setNotifyValue(isNotifying);
     }
   }
 
@@ -75,6 +67,28 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (dateData.length > 4) {
+      // int byteI = 18;
+      // print('${dateData[0].sublist(1, 3)}- i=$byteI: ${dateData[0].sublist(byteI)}');
+      // print('${dateData[1].sublist(1, 3)}- i=$byteI: ${dateData[1].sublist(byteI)}');
+      // print('${dateData[2].sublist(1, 3)}- i=$byteI: ${dateData[2].sublist(byteI)}');
+      // print('${dateData[3].sublist(1, 3)}- i=$byteI: ${dateData[3].sublist(byteI)}');
+      // print('${dateData[4].sublist(1, 3)}- i=$byteI: ${dateData[4].sublist(byteI)}');
+      // var testValue = [71, 39];
+      // var testValue2 = [39, 69];
+      // var testValue3 = [69, 39];
+      // var testValue4 = [39, 73];
+      // var testValue5 = [73, 39];
+
+      // print('$testValue = ${ByteData.view(Uint8List.fromList(testValue).buffer).getInt16(0, Endian.host)}');
+      // print('$testValue2 = ${ByteData.view(Uint8List.fromList(testValue2).buffer).getInt16(0, Endian.host)}');
+      // print('$testValue3 = ${ByteData.view(Uint8List.fromList(testValue3).buffer).getInt16(0, Endian.host)}');
+      // print('$testValue4 = ${ByteData.view(Uint8List.fromList(testValue4).buffer).getInt16(0, Endian.host)}');
+      // print('$testValue5 = ${ByteData.view(Uint8List.fromList(testValue5).buffer).getInt16(0, Endian.host)}');
+
+      // print(dateData[0][21]);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -96,6 +110,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(width: double.infinity),
@@ -137,7 +152,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                     if (snapshot.hasData) {
                       // return Text('${snapshot.data}');
                       if (snapshot.data?.length != 4) {
-                        return Text('short');
+                        return const Text('No data');
                       }
                       var bytes = Uint8List.fromList(snapshot.data!);
                       var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
@@ -145,14 +160,14 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                       if (numberValue > 0) {
                         return SizedBox(height: 280, child: DetailGaugeDial(value: ((numberValue - 1009000) / 1000), isPressure: true));
                       } else {
-                        return Text('number less than 0');
+                        return const Text('number less than 0');
                       }
                     } else if (snapshot.hasError) {
                       // TODO: do something with the error
                       return Text(snapshot.error.toString());
                     }
                     // TODO: the data is not ready, show a loading indicator
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }),
               StreamBuilder<List<int>>(
                   // initialData: [0, 0, 0, 0],
@@ -162,7 +177,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                     if (snapshot.hasData) {
                       // return Text('${snapshot.data}');
                       if (snapshot.data?.length != 4) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Text('No data');
                       }
                       var bytes = Uint8List.fromList(snapshot.data!);
                       var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
@@ -173,14 +188,248 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                       return Text(snapshot.error.toString());
                     }
                     // TODO: the data is not ready, show a loading indicator
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }),
               // SizedBox(height: 280, child: DetailGaugeDial(value: widget.values[1], isPressure: false)),
+              StreamBuilder<List<int>>(
+                  stream: timeCharacteristic.value,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      if (snapshot.data?.isEmpty ?? true) {
+                        return const Text('No data');
+                      }
+                      var bytes = Uint8List.fromList(snapshot.data!);
+                      var yearValue = ByteData.view(bytes.buffer).getInt16(0, Endian.host);
+                      DateTime date = DateTime(yearValue, bytes[2], bytes[3], bytes[4], bytes[5], bytes[6]);
+                      var df = DateFormat('HH:mm:ss - dd/MM/yyyy');
+                      return Text(df.format(date));
+                    } else if (snapshot.hasError) {
+                      // TODO: do something with the error
+                      return Text(snapshot.error.toString());
+                    }
+                    // TODO: the data is not ready, show a loading indicator
+                    return const Center(child: CircularProgressIndicator());
+                  }),
+              ElevatedButton(
+                  onPressed: () {
+                    print('setting ${!isNotifying}');
+                    changeNotifying(!isNotifying);
+                    isNotifying = !isNotifying;
+                  },
+                  child: const Text('Change Notify')),
+
+              ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      DateTime timeNow = DateTime.now();
+                      var yearByte = Uint8List(2)..buffer.asInt16List()[0] = timeNow.year;
+                      List<int> timeNowBytes = [];
+                      timeNowBytes.addAll(yearByte);
+                      timeNowBytes.addAll([timeNow.month, timeNow.day, timeNow.hour, timeNow.minute, timeNow.second, 7, 0, 0]);
+                      await timeCharacteristic.write(timeNowBytes);
+                    } on Exception catch (e) {
+                      print(e.toString());
+                    }
+                  },
+                  child: const Text('Set Time')),
+              ElevatedButton(
+                  onPressed: () async {
+                    //4afa9a10-05ec-482c-8279-3ebf3c3e1b74
+                    try {
+                      int sampleRateIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '4afa9a10-05ec-482c-8279-3ebf3c3e1b74');
+                      BluetoothCharacteristic sampleRateCharacteristic = dataService.characteristics[sampleRateIndex];
+                      await sampleRateCharacteristic.write([60, 0]);
+                    } on Exception catch (e) {
+                      print(e.toString());
+                    }
+                  },
+                  child: const Text('Sample Rate')),
+              ElevatedButton(
+                  onPressed: () async {
+                    int dataLengthIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '8b8df99d-c029-459f-a213-9e9ecac551bf');
+                    int dataIdIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '1c70d98c-935b-4ff3-ae08-a1cda58c34fa');
+
+                    BluetoothCharacteristic dataLengthCharacteristic = dataService.characteristics[dataLengthIndex];
+                    BluetoothCharacteristic dataIdCharacteristic = dataService.characteristics[dataIdIndex];
+
+                    var dataLength = await dataLengthCharacteristic.read();
+
+                    try {
+                      int dataLenghtInt = ByteData.view(Uint8List.fromList(dataLength).buffer).getInt16(0, Endian.host);
+                      var dataIdResult = await dataIdCharacteristic.write(Uint8List(2)..buffer.asInt16List()[0] = dataLenghtInt - 1);
+                      // var dataIdResult = await dataIdCharacteristic.write([29, 0]);
+                      print('result: $dataIdResult - Length: $dataLength');
+                    } on Exception catch (e) {
+                      print(e.toString());
+                    }
+                  },
+                  child: const Text('Reset Index')),
+              ElevatedButton(
+                onPressed: () async {
+                  //service id: 8d8cceb9-ec48-4621-b293-0bafb0e0fa2d
+                  //char id:  03ee8a35-7a28-4cd9-affe-8d0205b4b093
+                  //1c70d98c-935b-4ff3-ae08-a1cda58c34fa
+                  //8b8df99d-c029-459f-a213-9e9ecac551bf
+
+                  int dateDataIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '03ee8a35-7a28-4cd9-affe-8d0205b4b093');
+                  BluetoothCharacteristic dateDataCharacteristic = dataService.characteristics[dateDataIndex];
+                  // var dataLength = await dataLengthCharacteristic.read();
+                  // await Future.delayed(const Duration(milliseconds: 100));
+
+                  // try {
+                  //   int dataLenghtInt = ByteData.view(Uint8List.fromList(dataLength).buffer).getInt16(0, Endian.host);
+                  //   // var dataIdResult = await dataIdCharacteristic.write(Uint8List(2)..buffer.asInt16List()[0] = dataLenghtInt - 1);
+                  //   var dataIdResult = await dataIdCharacteristic.write([29, 0]);
+                  //   print('result: $dataIdResult - Length: $dataLength');
+                  // } on Exception catch (e) {
+                  //   print(e.toString());
+                  // }
+                  var data = await dateDataCharacteristic.read();
+                  for (var i = 0; i < data.length / 48; i++) {
+                    dateData.add(data.sublist(i * 48, i * 48 + 48));
+
+                    // print('${data.sublist(i * 48 + 1, i * 48 + 3)}- i=18: ${data.sublist(i * 48 + 18, i * 48 + 48)}');
+                    print('${data.sublist(i * 48, i * 48 + 48)}');
+                    // print('18-20:${data.sublist(i * 48 + 18, i * 48 + 21)}- 33:36${data.sublist(i * 48 + 33, i * 48 + 37)}- 41:47${data.sublist(i * 48 + 41, i * 48 + 48)}');
+                  }
+                  // dateData.sort(
+                  //   (a, b) {
+                  //     var bytesa = Uint8List.fromList(a);
+                  //     var bytesb = Uint8List.fromList(b);
+
+                  //     int dataIndexa = ByteData.view(bytesa.buffer).getInt16(1, Endian.host);
+                  //     int dataIndexb = ByteData.view(bytesb.buffer).getInt16(1, Endian.host);
+                  //     return dataIndexa.compareTo(dataIndexb);
+                  //   },
+                  // );
+                  print('data. $data');
+
+                  print(data.length);
+                  setState(() {});
+                  // dateData.clear();
+                },
+                child: const Text('Data'),
+              ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: 1200,
+                  child: Column(
+                    children: [
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 215),
+                          child: Text('Pressure[Pa]'),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Container(width: 210, color: Colors.black, child: const Text('')),
+                          Container(width: 105, color: Colors.black, child: const Text('   Pressure[Pa]')),
+                          Container(width: 1, color: Colors.white, child: const Text('')),
+                          Container(width: 80, color: Colors.black, child: const Text(' Movement')),
+                          Container(width: 1, color: Colors.white, child: const Text('')),
+                          Container(width: 135, color: Colors.black, child: const Text(' Temperature')),
+                          Container(width: 1, color: Colors.white, child: const Text('')),
+                          Container(width: 135, color: Colors.black, child: const Text(' Barometer[HG]')),
+                          Container(width: 1, color: Colors.white, child: const Text('')),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(width: 40, color: Colors.black, child: const Text('ID')),
+                          Container(width: 100, color: Colors.grey, child: const Text('Date')),
+                          Container(width: 35, color: Colors.black, child: const Text('Type')),
+                          Container(width: 35, color: Colors.grey, child: const Text('Smlp')),
+                          Container(width: 40, color: Colors.black, child: const Text('Avg')),
+                          Container(width: 40, color: Colors.grey, child: const Text('Max')),
+                          Container(width: 40, color: Colors.black, child: const Text('Min')),
+                          Container(width: 1, color: Colors.white, child: const Text('')),
+                          Container(width: 40, color: Colors.black, child: const Text('Min')),
+                          Container(width: 40, color: Colors.black, child: const Text('Max')),
+                          Container(width: 1, color: Colors.white, child: const Text('')),
+                          Container(width: 45, color: Colors.black, child: const Text('Avg')),
+                          Container(width: 45, color: Colors.grey, child: const Text('Max')),
+                          Container(width: 45, color: Colors.black, child: const Text('Min')),
+                          Container(width: 1, color: Colors.white, child: const Text('')),
+                          Container(width: 45, color: Colors.black, child: const Text('Avg')),
+                          Container(width: 45, color: Colors.grey, child: const Text('Max')),
+                          Container(width: 45, color: Colors.black, child: const Text('Min')),
+                          Container(width: 1, color: Colors.white, child: const Text('')),
+                        ],
+                      ),
+                      Container(color: Colors.white, width: 1200, height: 1),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: dateData.length,
+                        itemBuilder: (context, index) {
+                          var data = dateData[index];
+                          var bytes = Uint8List.fromList(data);
+                          var yearValue = ByteData.view(bytes.buffer).getInt16(3, Endian.host);
+                          DateTime date = DateTime(yearValue, bytes[2 + 3], bytes[3 + 3], bytes[4 + 3], bytes[5 + 3], bytes[6 + 3]);
+                          var df = DateFormat('HH:mm|d/M/yy');
+                          int dataIndex = ByteData.view(bytes.buffer).getInt16(1, Endian.host);
+                          var sample = ByteData.view(bytes.buffer).getInt16(10, Endian.host);
+                          var avgSensorPressure = (ByteData.view(bytes.buffer).getInt16(12, Endian.host) / 100).toStringAsFixed(2);
+                          var maxSensorPressure = (ByteData.view(bytes.buffer).getInt16(14, Endian.host) / 100).toStringAsFixed(2);
+                          var minSensorPressure = (ByteData.view(bytes.buffer).getInt16(16, Endian.host) / 100).toStringAsFixed(2);
+                          var maxMovement = (ByteData.view(bytes.buffer).getInt16(37, Endian.host));
+                          var minMovement = (ByteData.view(bytes.buffer).getInt16(39, Endian.host));
+                          var avgTemp = (((((ByteData.view(bytes.buffer).getInt16(27, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
+                          var minTemp = (((((ByteData.view(bytes.buffer).getInt16(29, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
+                          var maxTemp = (((((ByteData.view(bytes.buffer).getInt16(31, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
+                          var avgBarometer = ((ByteData.view(bytes.buffer).getInt16(21, Endian.host) * 29.53) / 100 / 100).toStringAsFixed(2);
+                          var maxBarometer = ((ByteData.view(bytes.buffer).getInt16(23, Endian.host) * 29.53) / 100 / 100).toStringAsFixed(2);
+                          var minBarometer = ((ByteData.view(bytes.buffer).getInt16(25, Endian.host) * 29.53) / 100 / 100).toStringAsFixed(2);
+
+                          String restOfData = data.sublist(18, 21).toString();
+                          restOfData += data.sublist(33, 37).toString();
+                          restOfData += data.sublist(41).toString();
+
+                          // Text('$dataIndex|${df.format(date)}|${bytes[0]}  |$sample  |$avgSensorPressure|$maxSensorPressure|$minSensorPressure||||'),
+                          return Row(
+                            children: [
+                              Container(width: 40, color: Colors.black, child: Text('$dataIndex')),
+                              Container(width: 100, color: Colors.grey, child: Text(df.format(date))),
+                              Container(width: 35, color: Colors.black, child: Text('${bytes[0]}')),
+                              Container(width: 40, color: Colors.grey, child: Text('$sample')),
+                              Container(width: 50, color: Colors.black, child: Text(avgSensorPressure)),
+                              Container(width: 50, color: Colors.grey, child: Text(maxSensorPressure)),
+                              Container(width: 50, color: Colors.black, child: Text(minSensorPressure)),
+                              Container(width: 1, color: Colors.white, child: const Text('')),
+                              Container(width: 50, color: Colors.black, child: Text('$minMovement')),
+                              Container(width: 50, color: Colors.black, child: Text('$maxMovement')),
+                              Container(width: 1, color: Colors.white, child: const Text('')),
+                              Container(width: 50, color: Colors.black, child: Text(avgTemp)),
+                              Container(width: 50, color: Colors.black, child: Text(maxTemp)),
+                              Container(width: 50, color: Colors.black, child: Text(minTemp)),
+                              Container(width: 1, color: Colors.white, child: const Text('')),
+                              Container(width: 50, color: Colors.black, child: Text(avgBarometer)),
+                              Container(width: 50, color: Colors.black, child: Text(minBarometer)),
+                              Container(width: 50, color: Colors.black, child: Text(maxBarometer)),
+                              Container(width: 1, color: Colors.white, child: const Text('')),
+                              Container(width: 290, color: Colors.black, child: Text(restOfData)),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              )
             ],
           ),
         ),
       ),
     );
+  }
+
+  changeNotifying(bool notify) async {
+    await timeCharacteristic.setNotifyValue(notify);
+    await pressureCharacteristic.setNotifyValue(notify);
+    await flowCharacteristic.setNotifyValue(notify);
   }
 }
 

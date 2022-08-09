@@ -113,6 +113,8 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                         ElevatedButton(
                                           onPressed: characteristic.properties.read
                                               ? () async {
+                                                  print('service id:  ${service.uuid}');
+                                                  print('char id:  ${characteristic.uuid}');
                                                   // var sub = characteristic.value.listen((value) {
                                                   //   readValues[characteristic.uuid] = value;
                                                   // });
@@ -138,12 +140,26 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                                   // print(utf8.decode(bytes.sublist(0, 3), allowMalformed: true));
                                                   // String text = 'LPG';
                                                   // print('$text = ${utf8.encode('text')}');
-//0-2 = unknown
+//0 = type
+//1-2 = index
 //3-9 = time/date
 //10-11 = Data Sample Rate
-//10-11 = Data Sample Rate
-//10-11 = Data Sample Rate
-//10-11 = Data Sample Rate
+//12-13 = avgSensorPressure
+//14-15 = maxSensorPressure
+//16-17 = minSensorPressure
+//18-20 ???
+//21-22 = avgBarometer
+//23-24 = maxBarometer
+//25-26 = minBarometer
+//27-28 = avgTemp
+//29-30 = maxTemp
+//31-32 = minTemp
+//33-36 ???
+//37-38 = maxMovement
+//39-40 = minMovement
+//41-47 ???
+//
+//
                                                   // sub.cancel();
                                                 }
                                               : null,
@@ -156,7 +172,10 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                                   //  characteristic.write([208, 7, 1, 1, 2, 50, 58, 7, 0, 0]);
                                                   // characteristic.write([110, 101, 101, 100, 108, 105, 116, 101]);
                                                   try {
-                                                    await characteristic.write([1]);
+                                                    int value = 60;
+                                                    var dataValue = Uint8List(2)..buffer.asInt16List()[0] = value;
+                                                    print('$value    = $dataValue');
+                                                    await characteristic.write(dataValue);
                                                   } on Exception catch (e) {
                                                     print(e.toString());
                                                   }
