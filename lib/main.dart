@@ -5,9 +5,12 @@ import 'package:flowprotest/select_bt_device.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'example/main2.dart';
 import 'model/providers/loading_provider.dart';
 
 void main() {
+  // runApp(FlutterBlueApp());
+
   runApp(
     MultiProvider(
       providers: [

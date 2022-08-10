@@ -30,9 +30,7 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
           ),
           SizedBox(
             height: 80,
-            child: Image.asset(
-              'assets/logo/logo_light.png',
-            ),
+            child: Image.asset('assets/logo/logo_light.png'),
           ),
           const SizedBox(
             height: 10,
@@ -61,16 +59,12 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
                     return Center(
                         child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 90),
-                        const Icon(
-                          Icons.no_cell_rounded,
-                          color: Colors.white30,
-                          size: 80,
-                        ),
-                        const SizedBox(height: 40),
-                        const Text('No devices connected'),
-                        const SizedBox(height: 10),
+                      children: const [
+                        SizedBox(height: 90),
+                        Icon(Icons.no_cell_rounded, color: Colors.white30, size: 80),
+                        SizedBox(height: 40),
+                        Text('No devices connected'),
+                        SizedBox(height: 10),
                       ],
                     ));
                   }
@@ -78,7 +72,7 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
                       shrinkWrap: true,
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, i) {
-                        print('${snapshot.data![i].name}');
+                        // print('${snapshot.data![i].name}');
                         return Card(
                           child: Row(
                             children: [
@@ -107,8 +101,10 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
                               IconButton(
                                 onPressed: () async {
                                   List<BluetoothService> services = await snapshot.data![i].discoverServices();
+
                                   if (mounted) {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => SingleReaderPage(title: snapshot.data![i].name, services: services)));
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) => SingleReaderPage(title: snapshot.data![i].name, services: services)));
                                   }
                                 },
                                 icon: const Icon(Icons.insert_chart_outlined_rounded),
@@ -127,10 +123,20 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
                               IconButton(
                                 onPressed: () async {
                                   await snapshot.data![i].disconnect();
+                                  await Future.delayed(const Duration(milliseconds: 100));
                                   setState(() {});
                                 },
                                 icon: const Icon(Icons.link_off),
                                 color: Colors.red,
+                              ),
+                              IconButton(
+                                onPressed: () async {
+                                  // await snapshot.data![i].requestMtu(512);
+                                  int mtu = await snapshot.data![i].mtu.first;
+                                  print(mtu);
+                                },
+                                icon: const Icon(Icons.text_snippet),
+                                color: Colors.white,
                               ),
                             ],
                           ),

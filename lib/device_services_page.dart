@@ -17,6 +17,7 @@ class DeviceServicesPage extends StatefulWidget {
 
 class _DeviceServicesPageState extends State<DeviceServicesPage> {
   List<List<int>> datasamples = [];
+  int writeValue = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -172,10 +173,15 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                                   //  characteristic.write([208, 7, 1, 1, 2, 50, 58, 7, 0, 0]);
                                                   // characteristic.write([110, 101, 101, 100, 108, 105, 116, 101]);
                                                   try {
-                                                    int value = 60;
-                                                    var dataValue = Uint8List(2)..buffer.asInt16List()[0] = value;
-                                                    print('$value    = $dataValue');
-                                                    await characteristic.write(dataValue);
+                                                    // int value = 60;
+                                                    // var dataValue = Uint8List(2)..buffer.asInt16List()[0] = value;
+                                                    // print('$value    = $dataValue');
+                                                    if (writeValue == 0) {
+                                                      writeValue = 1;
+                                                    } else {
+                                                      writeValue = 0;
+                                                    }
+                                                    await characteristic.write([writeValue]);
                                                   } on Exception catch (e) {
                                                     print(e.toString());
                                                   }
@@ -208,7 +214,9 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                       var bytesResult = utf8.decode(bytes, allowMalformed: true);
                                       // print('Data parse: $bytesResult');
                                       String result = '--';
-                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' || characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2' || characteristic.uuid.toString() == '00002a00-0000-1000-8000-00805f9b34fb') {
+                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' ||
+                                          characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2' ||
+                                          characteristic.uuid.toString() == '00002a00-0000-1000-8000-00805f9b34fb') {
                                         result = String.fromCharCodes(bytes);
                                       } else {
                                         if (bytes.lengthInBytes == 192) {
