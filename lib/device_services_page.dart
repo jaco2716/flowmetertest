@@ -214,9 +214,7 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                       var bytesResult = utf8.decode(bytes, allowMalformed: true);
                                       // print('Data parse: $bytesResult');
                                       String result = '--';
-                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' ||
-                                          characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2' ||
-                                          characteristic.uuid.toString() == '00002a00-0000-1000-8000-00805f9b34fb') {
+                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' || characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2' || characteristic.uuid.toString() == '00002a00-0000-1000-8000-00805f9b34fb') {
                                         result = String.fromCharCodes(bytes);
                                       } else {
                                         if (bytes.lengthInBytes == 192) {
@@ -252,7 +250,8 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                         } else if (bytes.lengthInBytes == 4) {
                                           var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
                                           // print('32bit - Lenght: ${bytes.lengthInBytes}, Value: $numberValue');
-                                          result = '$numberValue - 32byte';
+                                          result = '$data - RAW';
+                                          // result = '$numberValue - 32byte';
                                         } else if (bytes.lengthInBytes == 2) {
                                           var numberValue = ByteData.view(bytes.buffer).getInt16(0, Endian.host);
                                           // print('16bit - Lenght: ${bytes.lengthInBytes}, Value: $numberValue');

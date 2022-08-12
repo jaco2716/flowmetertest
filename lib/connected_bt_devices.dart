@@ -103,8 +103,7 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
                                   List<BluetoothService> services = await snapshot.data![i].discoverServices();
 
                                   if (mounted) {
-                                    Navigator.push(context,
-                                        MaterialPageRoute(builder: (context) => SingleReaderPage(title: snapshot.data![i].name, services: services)));
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => SingleReaderPage(title: snapshot.data![i].name, services: services)));
                                   }
                                 },
                                 icon: const Icon(Icons.insert_chart_outlined_rounded),

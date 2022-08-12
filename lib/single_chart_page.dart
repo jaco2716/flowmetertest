@@ -124,7 +124,7 @@ class _SingleChartPageState extends State<SingleChartPage> {
 
                           if (context.read<SelectTypeListProvider>().indexSelected == 0) {
                             // if (selectTypeListProvider.indexSelected == 0) {
-                            dataValue = (numberValue) / 10000;
+                            dataValue = (numberValue) * 70 / 1000;
                           } else {
                             dataValue = (numberValue - 1009000) / 1000;
                           }

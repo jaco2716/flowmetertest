@@ -39,7 +39,8 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
     dataService = widget.services[serviceIndex];
     int preassureIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '3300c0b5-2369-4322-8296-5564f44850b3');
     pressureCharacteristic = dataService.characteristics[preassureIndex];
-    int flowIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '951770bd-a550-4466-b16f-4bc3170f4d0e');
+    int flowIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '7cb8e55f-d785-4c62-b6f7-ba6ba7581b7b');
+    // int flowIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '951770bd-a550-4466-b16f-4bc3170f4d0e');
     flowCharacteristic = dataService.characteristics[flowIndex];
     if (!timeCharacteristic.isNotifying) {
       await timeCharacteristic.setNotifyValue(isNotifying);
@@ -155,10 +156,10 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                         return const Text('No data');
                       }
                       var bytes = Uint8List.fromList(snapshot.data!);
-                      var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
+                      var numberValue = ByteData.view(bytes.buffer).getUint32(0, Endian.host);
                       // TODO: do something with the data
                       if (numberValue > 0) {
-                        return SizedBox(height: 280, child: DetailGaugeDial(value: ((numberValue - 1009000) / 1000), isPressure: true));
+                        return SizedBox(height: 280, child: DetailGaugeDial(value: ((numberValue.toDouble() - 1021200) / 1000), isPressure: true));
                       } else {
                         return const Text('number less than 0');
                       }
@@ -182,7 +183,8 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                       var bytes = Uint8List.fromList(snapshot.data!);
                       var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
                       // TODO: do something with the data
-                      return SizedBox(height: 280, child: DetailGaugeDial(value: ((numberValue) / 10000), isPressure: false));
+                      return SizedBox(height: 280, child: DetailGaugeDial(value: (((numberValue.toDouble() * 70 / 1000))), isPressure: false));
+                      // return SizedBox(height: 280, child: DetailGaugeDial(value: (((numberValue.toDouble() / 10000 - 16))), isPressure: false));
                     } else if (snapshot.hasError) {
                       // TODO: do something with the error
                       return Text(snapshot.error.toString());
@@ -239,8 +241,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                       onPressed: () async {
                         //4afa9a10-05ec-482c-8279-3ebf3c3e1b74
                         try {
-                          int sampleRateIndex =
-                              dataService.characteristics.indexWhere((element) => element.uuid.toString() == '4afa9a10-05ec-482c-8279-3ebf3c3e1b74');
+                          int sampleRateIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '4afa9a10-05ec-482c-8279-3ebf3c3e1b74');
                           BluetoothCharacteristic sampleRateCharacteristic = dataService.characteristics[sampleRateIndex];
                           List<int> sampleRate = Uint8List(2)..buffer.asInt16List()[0] = 60;
                           await sampleRateCharacteristic.write(sampleRate);
@@ -256,10 +257,8 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                 children: [
                   ElevatedButton(
                       onPressed: () async {
-                        int dataLengthIndex =
-                            dataService.characteristics.indexWhere((element) => element.uuid.toString() == '8b8df99d-c029-459f-a213-9e9ecac551bf');
-                        int dataIdIndex =
-                            dataService.characteristics.indexWhere((element) => element.uuid.toString() == '1c70d98c-935b-4ff3-ae08-a1cda58c34fa');
+                        int dataLengthIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '8b8df99d-c029-459f-a213-9e9ecac551bf');
+                        int dataIdIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '1c70d98c-935b-4ff3-ae08-a1cda58c34fa');
 
                         BluetoothCharacteristic dataLengthCharacteristic = dataService.characteristics[dataLengthIndex];
                         BluetoothCharacteristic dataIdCharacteristic = dataService.characteristics[dataIdIndex];
@@ -283,8 +282,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                       //1c70d98c-935b-4ff3-ae08-a1cda58c34fa
                       //8b8df99d-c029-459f-a213-9e9ecac551bf
 
-                      int dateDataIndex =
-                          dataService.characteristics.indexWhere((element) => element.uuid.toString() == '03ee8a35-7a28-4cd9-affe-8d0205b4b093');
+                      int dateDataIndex = dataService.characteristics.indexWhere((element) => element.uuid.toString() == '03ee8a35-7a28-4cd9-affe-8d0205b4b093');
                       BluetoothCharacteristic dateDataCharacteristic = dataService.characteristics[dateDataIndex];
                       // var dataLength = await dataLengthCharacteristic.read();
                       // await Future.delayed(const Duration(milliseconds: 100));
@@ -388,21 +386,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: dateData.length,
                         itemBuilder: (context, index) {
-                          String dataIndex = '',
-                              dateString = '',
-                              typeString = '',
-                              sample = '',
-                              avgSensorPressure = '',
-                              maxSensorPressure = '',
-                              minSensorPressure = '',
-                              maxMovement = '',
-                              minMovement = '',
-                              avgTemp = '',
-                              minTemp = '',
-                              maxTemp = '',
-                              avgBarometer = '',
-                              maxBarometer = '',
-                              minBarometer = '';
+                          String dataIndex = '', dateString = '', typeString = '', sample = '', avgSensorPressure = '', maxSensorPressure = '', minSensorPressure = '', maxMovement = '', minMovement = '', avgTemp = '', minTemp = '', maxTemp = '', avgBarometer = '', maxBarometer = '', minBarometer = '', avgFlow = '', maxFlow = '', minFlow = '';
                           var data = dateData[index];
                           var bytes = Uint8List.fromList(data);
                           dataIndex = ByteData.view(bytes.buffer).getInt16(1, Endian.host).toString();
@@ -418,15 +402,13 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                           minSensorPressure = (ByteData.view(bytes.buffer).getInt16(16, Endian.host) / 100).toStringAsFixed(2);
                           maxMovement = (ByteData.view(bytes.buffer).getInt16(37, Endian.host)).toString();
                           minMovement = (ByteData.view(bytes.buffer).getInt16(39, Endian.host)).toString();
-                          avgTemp =
-                              (((((ByteData.view(bytes.buffer).getInt16(27, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
-                          minTemp =
-                              (((((ByteData.view(bytes.buffer).getInt16(29, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
-                          maxTemp =
-                              (((((ByteData.view(bytes.buffer).getInt16(31, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
+                          avgTemp = (((((ByteData.view(bytes.buffer).getInt16(27, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
+                          minTemp = (((((ByteData.view(bytes.buffer).getInt16(29, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
+                          maxTemp = (((((ByteData.view(bytes.buffer).getInt16(31, Endian.host) / 10) * 9 / 5) + 32) * 10).toInt() / 10).toStringAsFixed(1);
                           avgBarometer = ((ByteData.view(bytes.buffer).getInt16(21, Endian.host) * 29.53) / 100 / 100).toStringAsFixed(2);
                           maxBarometer = ((ByteData.view(bytes.buffer).getInt16(23, Endian.host) * 29.53) / 100 / 100).toStringAsFixed(2);
                           minBarometer = ((ByteData.view(bytes.buffer).getInt16(25, Endian.host) * 29.53) / 100 / 100).toStringAsFixed(2);
+                          avgFlow = ((ByteData.view(bytes.buffer).getInt32(33, Endian.host)) / 10000).toStringAsFixed(2);
                           // } else {
                           //   // dateString = ByteData.view(Uint8List.fromList([0, 76]).buffer).getInt16(0, Endian.host).toString();
                           //   dateString = ByteData.view(bytes.buffer).getInt16(1, Endian.host).toString();
@@ -444,7 +426,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                               Container(width: 35, color: Colors.black, child: Text(typeString)),
                               Container(width: 40, color: Colors.white10, child: Text(sample)),
                               Container(width: 1, color: Colors.white, child: const Text('')),
-                              Container(width: 55, color: Colors.black, child: Text('-')),
+                              Container(width: 55, color: Colors.black, child: Text(avgFlow)),
                               Container(width: 55, color: Colors.white10, child: Text('-')),
                               Container(width: 55, color: Colors.black, child: Text('-')),
                               Container(width: 1, color: Colors.white, child: const Text('')),
@@ -522,68 +504,65 @@ class DetailGaugeDial extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        RadialGauge(
-          axes: [
-            RadialGaugeAxis(
-              minValue: 0,
-              maxValue: 300,
-              minAngle: -150,
-              maxAngle: 150,
-              radius: 0.9,
-              width: 0.1,
-              color: Colors.transparent,
-              pointers: [
-                RadialNeedlePointer(
-                    value: value,
-                    thicknessStart: 20,
-                    thicknessEnd: 0,
-                    length: 0.6,
-                    knobRadiusAbsolute: 10,
-                    color: Colors.white,
-                    knobColor: Colors.white)
-              ],
-              ticks: [
-                RadialTicks(interval: 20, alignment: RadialTickAxisAlignment.inside, color: Colors.white, length: 0.17, children: [
-                  RadialTicks(
-                    // interval: 50,
-                    ticksInBetween: 5,
-                    length: 0.13,
-                    color: Colors.grey,
+        TweenAnimationBuilder(
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+            tween: Tween<double>(begin: 0.0, end: value),
+            builder: (context, double tweenValue, child) {
+              return RadialGauge(
+                axes: [
+                  RadialGaugeAxis(
+                    minValue: 0,
+                    maxValue: 300,
+                    minAngle: -150,
+                    maxAngle: 150,
+                    radius: 0.9,
+                    width: 0.1,
+                    color: Colors.transparent,
+                    pointers: [RadialNeedlePointer(value: tweenValue, thicknessStart: 20, thicknessEnd: 0, length: 0.6, knobRadiusAbsolute: 10, color: Colors.white, knobColor: Colors.white)],
+                    ticks: [
+                      RadialTicks(interval: 20, alignment: RadialTickAxisAlignment.inside, color: Colors.white, length: 0.17, children: [
+                        RadialTicks(
+                          // interval: 50,
+                          ticksInBetween: 5,
+                          length: 0.13,
+                          color: Colors.grey,
+                        ),
+                      ]),
+                    ],
+                    segments: [
+                      RadialGaugeSegment(
+                        minValue: 0,
+                        maxValue: 100,
+                        minAngle: -150,
+                        maxAngle: -50,
+                        color: color1,
+                      ),
+                      RadialGaugeSegment(
+                        minValue: 100,
+                        maxValue: 200,
+                        minAngle: -50,
+                        maxAngle: 50,
+                        color: color2,
+                      ),
+                      RadialGaugeSegment(
+                        minValue: 200,
+                        maxValue: 300,
+                        minAngle: 50,
+                        maxAngle: 150,
+                        color: color3,
+                      ),
+                    ],
                   ),
-                ]),
-              ],
-              segments: [
-                RadialGaugeSegment(
-                  minValue: 0,
-                  maxValue: 100,
-                  minAngle: -150,
-                  maxAngle: -50,
-                  color: color1,
-                ),
-                RadialGaugeSegment(
-                  minValue: 100,
-                  maxValue: 200,
-                  minAngle: -50,
-                  maxAngle: 50,
-                  color: color2,
-                ),
-                RadialGaugeSegment(
-                  minValue: 200,
-                  maxValue: 300,
-                  minAngle: 50,
-                  maxAngle: 150,
-                  color: color3,
-                ),
-              ],
-            ),
-          ],
-        ),
+                ],
+              );
+            }),
         Padding(
           padding: const EdgeInsets.only(top: 180.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('${value}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              Text('${(value * 100).round() / 100}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               Text(title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
             ],
           ),
