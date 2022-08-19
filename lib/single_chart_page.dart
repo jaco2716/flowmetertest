@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flowprotest/model/providers/select_type_provider.dart';
+import 'package:flowprotest/my_scrollview_w_constraints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:provider/provider.dart';
@@ -57,7 +58,7 @@ class _SingleChartPageState extends State<SingleChartPage> {
           builder: (context, child) {
             var selectTypeListProvider = Provider.of<SelectTypeListProvider>(context);
 
-            return SingleChildScrollView(
+            return MyScrollviewWConstraints(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 // crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +125,12 @@ class _SingleChartPageState extends State<SingleChartPage> {
 
                           if (context.read<SelectTypeListProvider>().indexSelected == 0) {
                             // if (selectTypeListProvider.indexSelected == 0) {
-                            dataValue = (numberValue) * 70 / 1000;
+                            // dataValue = (numberValue).toDouble();
+                            //TODO get right multiplier
+                            var flowMultiplier = ((0 + 14.7) / 14.7) * ((200 + 460) / (80.4 + 460)) * 0.06;
+                            // var flowMultiplier = ((80.46 + 460) / 530 * 14.7 / (14.7 + 40));
+                            print(flowMultiplier);
+                            dataValue = numberValue * flowMultiplier;
                           } else {
                             dataValue = (numberValue - 1009000) / 1000;
                           }
@@ -135,8 +141,8 @@ class _SingleChartPageState extends State<SingleChartPage> {
 
                           minY = dataValues.reduce((curr, next) => curr.y < next.y ? curr : next).y;
                           maxY = dataValues.reduce((curr, next) => curr.y > next.y ? curr : next).y;
-                          print('max: $maxY');
-                          print('min: $minY');
+                          // print('max: $maxY');
+                          // print('min: $minY');
 
                           // if (minY > finalDouble || dataindex < 1) {
                           //   minY = finalDouble;
@@ -154,7 +160,8 @@ class _SingleChartPageState extends State<SingleChartPage> {
                                 style: const TextStyle(fontSize: 25, color: Color(0xff23b6e6)),
                               ),
                               AspectRatio(
-                                aspectRatio: 0.8,
+                                // aspectRatio: 0.8,
+                                aspectRatio: 1,
                                 child: loading
                                     ? const Center(child: CircularProgressIndicator())
                                     : Container(

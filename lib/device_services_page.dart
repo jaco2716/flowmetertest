@@ -21,13 +21,15 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
 
   @override
   Widget build(BuildContext context) {
-    // print('69, 39, =  ${ByteData.view(Uint8List.fromList([69, 39, 68, 39]).buffer).get(0, Endian.host)}');
+    // print('69, 39, =  ${ByteData.view(Uint8List.fromList([69, 39, 68, 39]).buffer).get(0, Endian.little)}');
     return Scaffold(
       appBar: AppBar(title: const Text('Services')),
       body: ListView.builder(
         itemCount: widget.services.length,
         itemBuilder: (context, index) {
           var service = widget.services[index];
+          // print('inc serv length: ${service.includedServices.length}');
+
           return ExpansionTile(
             key: GlobalKey(),
             title: Text('${service.uuid}'),
@@ -45,8 +47,25 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                     create: (context) => ByteDataProvider(characteristic),
                     builder: (context, child) {
                       var byteDataProvider = Provider.of<ByteDataProvider>(context);
+                      // print('char des length: ${characteristic.descriptors.length}');
                       return Column(
                         children: [
+                          // ListView.builder(
+                          //   shrinkWrap: true,
+                          //   itemCount: characteristic.descriptors.length,
+                          //   itemBuilder: (context, indexdes) {
+                          //     return Column(
+                          //       children: [
+                          //         Text(characteristic.descriptors[indexdes].uuid.toString()),
+                          //         StreamBuilder<Object>(
+                          //             stream: characteristic.descriptors[indexdes].value,
+                          //             builder: (context, dessnapshot) {
+                          //               return Text(dessnapshot.data.toString());
+                          //             }),
+                          //       ],
+                          //     );
+                          //   },
+                          // ),
                           // byteDataProvider.characteristic.descriptors.isNotEmpty
                           //     ? ListView.builder(
                           //         shrinkWrap: true,
@@ -122,7 +141,7 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                                   var data = await characteristic.read();
                                                   // var bytes = Uint8List.fromList([230, 7, 8, 5, 13, 12, 16, 5, 0, 0]);
                                                   var bytes = Uint8List.fromList(data);
-                                                  // var yearValue = ByteData.view(bytes.buffer).getInt16(3, Endian.host);
+                                                  // var yearValue = ByteData.view(bytes.buffer).getInt16(3, Endian.little);
                                                   // DateTime date = DateTime(yearValue, bytes[2 + 3], bytes[3 + 3], bytes[4 + 3], bytes[5 + 3], bytes[6 + 3]);
                                                   // var df = DateFormat('HH:mm:ss - dd/MM/yyyy');
                                                   // int start = 14;
@@ -135,8 +154,8 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                                   // int end = 14;
                                                   // log('$datasamples');
 
-                                                  // print('208, 7 = ${ByteData.view(Uint8List.fromList([60, 0]).buffer).getInt16(0, Endian.host)}');
-                                                  // print('${bytes.sublist(start, start + 4)} = ${ByteData.view(Uint8List.fromList(data).buffer).getInt32(start, Endian.host)}');
+                                                  // print('208, 7 = ${ByteData.view(Uint8List.fromList([60, 0]).buffer).getInt16(0, Endian.little)}');
+                                                  // print('${bytes.sublist(start, start + 4)} = ${ByteData.view(Uint8List.fromList(data).buffer).getInt32(start, Endian.little)}');
 
                                                   // print(utf8.decode(bytes.sublist(0, 3), allowMalformed: true));
                                                   // String text = 'LPG';
@@ -214,7 +233,9 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                       var bytesResult = utf8.decode(bytes, allowMalformed: true);
                                       // print('Data parse: $bytesResult');
                                       String result = '--';
-                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' || characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2' || characteristic.uuid.toString() == '00002a00-0000-1000-8000-00805f9b34fb') {
+                                      if (service.uuid.toString() == '0000180a-0000-1000-8000-00805f9b34fb' ||
+                                          characteristic.uuid.toString() == 'fdaffce0-85f8-4ac9-b0d2-8b133f8ea7b2' ||
+                                          characteristic.uuid.toString() == '00002a00-0000-1000-8000-00805f9b34fb') {
                                         result = String.fromCharCodes(bytes);
                                       } else {
                                         if (bytes.lengthInBytes == 192) {
@@ -229,17 +250,17 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                           // }
                                           // List<int> resultList = [];
                                           // for (var i = 0; i < 192 / bytelength; i++) {
-                                          //   resultList.add(ByteData.view(listlistbytes[i].buffer).getInt16(0, Endian.host));
+                                          //   resultList.add(ByteData.view(listlistbytes[i].buffer).getInt16(0, Endian.little));
                                           // }
-                                          // // var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
+                                          // // var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.little);
                                           // // print('32bit - Lenght: ${bytes.lengthInBytes}, Value: $numberValue');
                                           // // print(data);
                                           // result = '$resultList';
                                         } else if (bytes.lengthInBytes == 10) {
                                           var bytes2 = Uint8List.fromList([16, 10, 0, 208, 7, 1, 1, 4, 32, 13]);
-                                          var yearValue2 = ByteData.view(bytes2.buffer).getInt16(0, Endian.host);
+                                          var yearValue2 = ByteData.view(bytes2.buffer).getInt16(0, Endian.little);
                                           DateTime date2 = DateTime(yearValue2, bytes2[2], bytes2[3], bytes2[4], bytes2[5], bytes2[6]);
-                                          var yearValue = ByteData.view(bytes.buffer).getInt16(0, Endian.host);
+                                          var yearValue = ByteData.view(bytes.buffer).getInt16(0, Endian.little);
                                           DateTime date = DateTime(yearValue, bytes[2], bytes[3], bytes[4], bytes[5], bytes[6]);
                                           var df = DateFormat('HH:mm:ss - dd/MM/yyyy');
                                           print('Test date: ${df.format(date2)}');
@@ -248,12 +269,12 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
 
                                           result = df.format(date);
                                         } else if (bytes.lengthInBytes == 4) {
-                                          var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.host);
+                                          var numberValue = ByteData.view(bytes.buffer).getInt32(0, Endian.little);
                                           // print('32bit - Lenght: ${bytes.lengthInBytes}, Value: $numberValue');
                                           result = '$data - RAW';
                                           // result = '$numberValue - 32byte';
                                         } else if (bytes.lengthInBytes == 2) {
-                                          var numberValue = ByteData.view(bytes.buffer).getInt16(0, Endian.host);
+                                          var numberValue = ByteData.view(bytes.buffer).getInt16(0, Endian.little);
                                           // print('16bit - Lenght: ${bytes.lengthInBytes}, Value: $numberValue');
                                           result = '$numberValue - 16byte';
                                         } else if (bytes.lengthInBytes == 1) {
@@ -274,7 +295,7 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                       }
 
                                       var newint8list = Uint8List.fromList([16, 59, 1, 230]);
-                                      var newint8result = ByteData.view(newint8list.buffer).getInt16(0, Endian.host);
+                                      var newint8result = ByteData.view(newint8list.buffer).getInt16(0, Endian.little);
                                       // print('newint8:  $newint8result');
 
                                       // print('Lenght: ${bytes.lengthInBytes}');
