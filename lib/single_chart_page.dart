@@ -1,6 +1,4 @@
-import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flowprotest/model/providers/select_type_provider.dart';
 import 'package:flowprotest/my_scrollview_w_constraints.dart';

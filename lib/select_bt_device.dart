@@ -1,11 +1,7 @@
 import 'dart:async';
-
-import 'package:flowprotest/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-
 import 'device_services_page.dart';
-import 'my_alert_dialog.dart';
 import 'single_reader_page.dart';
 
 class SelectBtDevice extends StatefulWidget {
@@ -146,7 +142,8 @@ class _SelectBtDeviceState extends State<SelectBtDevice> {
                         children: [
                           const SizedBox(height: 20),
                           const Text('Connected to', style: TextStyle(color: Colors.white54), textAlign: TextAlign.center),
-                          Text(snapshot.data!.name, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white70), textAlign: TextAlign.center),
+                          Text(snapshot.data!.name,
+                              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white70), textAlign: TextAlign.center),
                           TextButton(
                               onPressed: () {
                                 setState(() {
@@ -198,7 +195,8 @@ class _SelectBtDeviceState extends State<SelectBtDevice> {
                           }
                           allResults = scanSnapshot.data!;
                           var newResults = allResults; //.where((element) => element.device.name.contains('FloPro')).toList();
-                          newResults.sort((a, b) => a.device.name.isEmpty ? 1 : a.device.name.compareTo(b.device.name.isEmpty ? 'zzzzz' : b.device.name));
+                          newResults
+                              .sort((a, b) => a.device.name.isEmpty ? 1 : a.device.name.compareTo(b.device.name.isEmpty ? 'zzzzz' : b.device.name));
                           if (newResults.isEmpty) {
                             return Column(
                               children: [

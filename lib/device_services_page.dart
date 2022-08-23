@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flowprotest/model/providers/byte_data_provider.dart';
 import 'package:intl/intl.dart';

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'package:flowprotest/data_testing_page.dart';
 import 'package:flowprotest/single_chart_page.dart';
@@ -198,7 +197,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                         //1084960
                         //TODO udregning
                         // numbervalue - BarometerValue * in/H20
-                        //TODO !!! Flow bliver udreget ved hjælp af temperatur og pressure
+                        //TODO !!! Flow bliver udreget ved hjælp af temperatur og pressure??
                         return Column(
                           children: [
                             Container(
@@ -221,7 +220,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                               height: 150,
                               width: 150,
                               // child: DetailGaugeDial(value: ((numberValue.toDouble())), isPressure: true),
-                              child: DetailGaugeDial(value: ((flowValue.toDouble())), isPressure: false),
+                              child: DetailGaugeDial(value: ((flowValue.toDouble() / 10)), isPressure: false),
                             ),
                             const Text('Flow'),
                           ],

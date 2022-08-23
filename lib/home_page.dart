@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flowprotest/select_bt_device.dart';
-import 'package:flowprotest/single_reader_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:gauges/gauges.dart';
 
 class MyHomePage extends StatefulWidget {

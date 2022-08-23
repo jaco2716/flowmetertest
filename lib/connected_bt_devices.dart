@@ -1,13 +1,10 @@
 import 'package:flowprotest/device_services_page.dart';
 import 'package:flowprotest/model/providers/loading_provider.dart';
 import 'package:flowprotest/scan_bt_devices.dart';
-import 'package:flowprotest/select_bt_device.dart';
 import 'package:flowprotest/single_reader_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:provider/provider.dart';
-
-import 'model/providers/type_with_notify.dart';
 
 class ConnectedBtDevices extends StatefulWidget {
   const ConnectedBtDevices({Key? key}) : super(key: key);
@@ -55,7 +52,7 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
               builder: (context, snapshot) {
                 print('Devices: ${snapshot.data?.map((e) => e.name)}');
                 if (snapshot.hasData) {
-                  if (snapshot.data!.length == 0) {
+                  if (snapshot.data!.isEmpty) {
                     return Center(
                         child: Column(
                       mainAxisSize: MainAxisSize.min,

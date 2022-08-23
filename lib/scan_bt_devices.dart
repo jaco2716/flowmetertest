@@ -29,7 +29,6 @@ class _ScanBtDevicesState extends State<ScanBtDevices> {
   @override
   void initState() {
     _findPrinters();
-    // TODO: implement initState
     super.initState();
   }
 
@@ -87,13 +86,15 @@ class _ScanBtDevicesState extends State<ScanBtDevices> {
                   builder: (context, scanSnapshot) {
                     if (scanSnapshot.hasData) {
                       var scanResults = scanSnapshot.data!.where((element) => element.device.type != BluetoothDeviceType.unknown).toList();
-                      scanResults.sort((a, b) => a.device.name.isEmpty ? 1 : a.device.name.compareTo(b.device.name.isEmpty ? 'zzzzz' : b.device.name));
+                      scanResults
+                          .sort((a, b) => a.device.name.isEmpty ? 1 : a.device.name.compareTo(b.device.name.isEmpty ? 'zzzzz' : b.device.name));
 
                       return Column(
                         children: [
                           const Padding(
                             padding: EdgeInsets.all(20.0),
-                            child: Text('Select a bluetooth device', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white60)),
+                            child:
+                                Text('Select a bluetooth device', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white60)),
                           ),
                           scanResults.isEmpty
                               ? const Center(child: Text('Ingen enheder fundet.'))
@@ -220,7 +221,6 @@ class _ScanBtDevicesState extends State<ScanBtDevices> {
   @override
   void dispose() {
     _timer?.cancel();
-    // TODO: implement dispose
     super.dispose();
   }
 }

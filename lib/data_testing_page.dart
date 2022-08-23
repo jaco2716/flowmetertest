@@ -21,7 +21,7 @@ class DataTestingPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _DataTestingPageState createState() => _DataTestingPageState();
+  State<DataTestingPage> createState() => _DataTestingPageState();
 }
 
 class _DataTestingPageState extends State<DataTestingPage> {
