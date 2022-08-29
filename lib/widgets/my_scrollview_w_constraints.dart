@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../res/value_constants.dart';
+import '../res/constants.dart';
 
 class MyScrollviewWConstraints extends StatelessWidget {
   final Widget child;

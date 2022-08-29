@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flowprotest/model/providers/type_with_notify.dart';
-import 'package:flowprotest/my_alert_dialog.dart';
+import 'package:flowprotest/widgets/my_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
@@ -128,16 +128,16 @@ class _ScanBtDevicesState extends State<ScanBtDevices> {
                                             if (e.code == 'already_connected') {
                                               showMyDialog(
                                                 context,
-                                                'already_connected',
-                                                'already_connected',
+                                                'Already Connected',
+                                                'Device is already connected.',
                                               );
                                             }
                                           }
                                           if (mounted) {
                                             showMyDialog(
                                               context,
-                                              returnValue! ? 'connection successful' : 'timeout occured',
-                                              returnValue! ? 'connection successful' : 'timeout occured',
+                                              returnValue! ? 'Success' : 'Error',
+                                              returnValue! ? 'Connection to device made!' : 'Timeout occured, try again.',
                                               infoDialog: !returnValue!,
                                               onlyAction: returnValue!,
                                               myOnPressed: () => Navigator.popUntil(context, (route) => route.isFirst),

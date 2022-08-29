@@ -2,6 +2,7 @@ import 'package:flowprotest/device_services_page.dart';
 import 'package:flowprotest/model/providers/loading_provider.dart';
 import 'package:flowprotest/scan_bt_devices.dart';
 import 'package:flowprotest/single_reader_page.dart';
+import 'package:flowprotest/widgets/my_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:provider/provider.dart';
@@ -86,15 +87,18 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
                                     ),
                                     Text(
                                       snapshot.data![i].id.id,
-                                      style: const TextStyle(fontSize: 12),
+                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
                                     ),
                                   ],
                                 ),
                               )),
                               IconButton(
                                 onPressed: () async {
+                                  // showMyDialog(context, '', '', widgetContent: const Center(child: CircularProgressIndicator()));
+                                  showDialog(context: context, builder: (context) => const Center(child: CircularProgressIndicator()));
                                   List<BluetoothService> services = await snapshot.data![i].discoverServices();
                                   if (mounted) {
+                                    Navigator.pop(context);
                                     Navigator.push(context,
                                         MaterialPageRoute(builder: (context) => SingleReaderPage(title: snapshot.data![i].name, services: services)));
                                   }
@@ -120,15 +124,6 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
                                 },
                                 icon: const Icon(Icons.link_off),
                                 color: Colors.red,
-                              ),
-                              IconButton(
-                                onPressed: () async {
-                                  // await snapshot.data![i].requestMtu(512);
-                                  int mtu = await snapshot.data![i].mtu.first;
-                                  print(mtu);
-                                },
-                                icon: const Icon(Icons.text_snippet),
-                                color: Colors.white,
                               ),
                             ],
                           ),

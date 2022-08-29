@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'constants.dart';
+import '../res/constants.dart';
 
 class MyAlertDialog extends StatelessWidget {
   final String title;
