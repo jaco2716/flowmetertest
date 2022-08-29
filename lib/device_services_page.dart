@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flowprotest/model/providers/byte_data_provider.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:provider/provider.dart';
 
 class DeviceServicesPage extends StatefulWidget {
@@ -190,20 +190,20 @@ class _DeviceServicesPageState extends State<DeviceServicesPage> {
                                                   // Write flopro date
                                                   //  characteristic.write([208, 7, 1, 1, 2, 50, 58, 7, 0, 0]);
                                                   // characteristic.write([110, 101, 101, 100, 108, 105, 116, 101]);
-                                                  try {
-                                                    // int value = 60;
-                                                    // var dataValue = Uint8List(2)..buffer.asInt16List()[0] = value;
-                                                    // print('$value    = $dataValue');
-                                                    if (writeValue == 0) {
-                                                      writeValue = 1;
-                                                    } else {
-                                                      writeValue = 0;
-                                                    }
-                                                    await characteristic.write([writeValue]);
-                                                  } on Exception catch (e) {
-                                                    print(e.toString());
-                                                  }
-                                                  print('done');
+                                                  // try {
+                                                  //   // int value = 60;
+                                                  //   // var dataValue = Uint8List(2)..buffer.asInt16List()[0] = value;
+                                                  //   // print('$value    = $dataValue');
+                                                  //   if (writeValue == 0) {
+                                                  //     writeValue = 1;
+                                                  //   } else {
+                                                  //     writeValue = 0;
+                                                  //   }
+                                                  //   await characteristic.write([writeValue]);
+                                                  // } on Exception catch (e) {
+                                                  //   print(e.toString());
+                                                  // }
+                                                  // print('done');
                                                 }
                                               : null,
                                           child: const Text('  Write  '),

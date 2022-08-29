@@ -2,9 +2,8 @@ import 'package:flowprotest/device_services_page.dart';
 import 'package:flowprotest/model/providers/loading_provider.dart';
 import 'package:flowprotest/scan_bt_devices.dart';
 import 'package:flowprotest/single_reader_page.dart';
-import 'package:flowprotest/widgets/my_alert_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 
 class ConnectedBtDevices extends StatefulWidget {
@@ -15,7 +14,7 @@ class ConnectedBtDevices extends StatefulWidget {
 }
 
 class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
-  FlutterBlue flutterBlue = FlutterBlue.instance;
+  FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -72,60 +71,58 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
                       itemBuilder: (context, i) {
                         // print('${snapshot.data![i].name}');
                         return Card(
-                          child: Row(
-                            children: [
-                              const SizedBox(width: 20),
-                              Expanded(
-                                  child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      snapshot.data![i].name,
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      snapshot.data![i].id.id,
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
-                                    ),
-                                  ],
+                          clipBehavior: Clip.hardEdge,
+                          child: InkWell(
+                            onTap: () => goToDeviceServices(snapshot.data![i]),
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 20),
+                                Expanded(
+                                    child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        snapshot.data![i].name,
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        snapshot.data![i].id.id,
+                                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                                const Icon(Icons.insert_chart_outlined_rounded, color: Colors.blue),
+                                const SizedBox(width: 10),
+                                // IconButton(
+                                //   onPressed: () async {},
+                                //   icon: const Icon(Icons.insert_chart_outlined_rounded),
+                                //   color: Colors.blue,
+                                // ),
+                                // IconButton(
+                                //   onPressed: () async {
+                                //     List<BluetoothService> services = await snapshot.data![i].discoverServices();
+                                //     if (mounted) {
+                                //       Navigator.push(context, MaterialPageRoute(builder: (context) => DeviceServicesPage(services: services)));
+                                //     }
+                                //   },
+                                //   icon: const Icon(Icons.settings),
+                                //   color: Colors.blue,
+                                // ),
+                                IconButton(
+                                  onPressed: () async {
+                                    await snapshot.data![i].disconnect();
+                                    await Future.delayed(const Duration(milliseconds: 100));
+                                    setState(() {});
+                                  },
+                                  icon: const Icon(Icons.link_off),
+                                  color: Colors.red,
                                 ),
-                              )),
-                              IconButton(
-                                onPressed: () async {
-                                  // showMyDialog(context, '', '', widgetContent: const Center(child: CircularProgressIndicator()));
-                                  showDialog(context: context, builder: (context) => const Center(child: CircularProgressIndicator()));
-                                  List<BluetoothService> services = await snapshot.data![i].discoverServices();
-                                  if (mounted) {
-                                    Navigator.pop(context);
-                                    Navigator.push(context,
-                                        MaterialPageRoute(builder: (context) => SingleReaderPage(title: snapshot.data![i].name, services: services)));
-                                  }
-                                },
-                                icon: const Icon(Icons.insert_chart_outlined_rounded),
-                                color: Colors.blue,
-                              ),
-                              IconButton(
-                                onPressed: () async {
-                                  List<BluetoothService> services = await snapshot.data![i].discoverServices();
-                                  if (mounted) {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => DeviceServicesPage(services: services)));
-                                  }
-                                },
-                                icon: const Icon(Icons.settings),
-                                color: Colors.blue,
-                              ),
-                              IconButton(
-                                onPressed: () async {
-                                  await snapshot.data![i].disconnect();
-                                  await Future.delayed(const Duration(milliseconds: 100));
-                                  setState(() {});
-                                },
-                                icon: const Icon(Icons.link_off),
-                                color: Colors.red,
-                              ),
-                            ],
+                                const SizedBox(width: 10),
+                              ],
+                            ),
                           ),
                         );
                       });
@@ -136,5 +133,15 @@ class _ConnectedBtDevicesState extends State<ConnectedBtDevices> {
         ],
       ),
     );
+  }
+
+  goToDeviceServices(BluetoothDevice device) async {
+    // showMyDialog(context, '', '', widgetContent: const Center(child: CircularProgressIndicator()));
+    showDialog(context: context, builder: (context) => const Center(child: CircularProgressIndicator()));
+    List<BluetoothService> services = await device.discoverServices();
+    if (mounted) {
+      Navigator.pop(context);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => SingleReaderPage(title: device.name, services: services)));
+    }
   }
 }

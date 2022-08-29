@@ -1,12 +1,10 @@
 import 'dart:async';
-
 import 'package:flowprotest/model/providers/type_with_notify.dart';
 import 'package:flowprotest/widgets/my_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
-
 import 'model/providers/loading_provider.dart';
 
 class ScanBtDevices extends StatefulWidget {
@@ -17,7 +15,7 @@ class ScanBtDevices extends StatefulWidget {
 }
 
 class _ScanBtDevicesState extends State<ScanBtDevices> {
-  FlutterBlue flutterBlue = FlutterBlue.instance;
+  FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
   Timer? _timer;
 
   Future<void> _findPrinters() async {
@@ -69,7 +67,9 @@ class _ScanBtDevicesState extends State<ScanBtDevices> {
                                 ), () {
                               return _findPrinters();
                             });
-                            boolsWithNotify.setValue(0, false);
+                            if (mounted) {
+                              boolsWithNotify.setValue(0, false);
+                            }
                           },
                           icon: const Icon(Icons.refresh));
                     }

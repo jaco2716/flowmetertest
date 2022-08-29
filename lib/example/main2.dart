@@ -4,10 +4,8 @@
 
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
-
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'widgets.dart';
 
 void main() {
@@ -22,7 +20,7 @@ class FlutterBlueApp extends StatelessWidget {
     return MaterialApp(
       color: Colors.lightBlue,
       home: StreamBuilder<BluetoothState>(
-          stream: FlutterBlue.instance.state,
+          stream: FlutterBluePlus.instance.state,
           initialData: BluetoothState.unknown,
           builder: (c, snapshot) {
             final state = snapshot.data;
@@ -74,12 +72,12 @@ class FindDevicesScreen extends StatelessWidget {
         title: const Text('Find Devices'),
       ),
       body: RefreshIndicator(
-        onRefresh: () => FlutterBlue.instance.startScan(timeout: const Duration(seconds: 4)),
+        onRefresh: () => FlutterBluePlus.instance.startScan(timeout: const Duration(seconds: 4)),
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
               StreamBuilder<List<BluetoothDevice>>(
-                stream: Stream.periodic(const Duration(seconds: 2)).asyncMap((_) => FlutterBlue.instance.connectedDevices),
+                stream: Stream.periodic(const Duration(seconds: 2)).asyncMap((_) => FlutterBluePlus.instance.connectedDevices),
                 initialData: const [],
                 builder: (c, snapshot) => Column(
                   children: snapshot.data!
@@ -104,7 +102,7 @@ class FindDevicesScreen extends StatelessWidget {
                 ),
               ),
               StreamBuilder<List<ScanResult>>(
-                stream: FlutterBlue.instance.scanResults,
+                stream: FlutterBluePlus.instance.scanResults,
                 initialData: const [],
                 builder: (c, snapshot) => Column(
                   children: snapshot.data!
@@ -125,18 +123,18 @@ class FindDevicesScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: StreamBuilder<bool>(
-        stream: FlutterBlue.instance.isScanning,
+        stream: FlutterBluePlus.instance.isScanning,
         initialData: false,
         builder: (c, snapshot) {
           if (snapshot.data!) {
             return FloatingActionButton(
-              onPressed: () => FlutterBlue.instance.stopScan(),
+              onPressed: () => FlutterBluePlus.instance.stopScan(),
               backgroundColor: Colors.red,
               child: const Icon(Icons.stop),
             );
           } else {
             return FloatingActionButton(
-                child: const Icon(Icons.search), onPressed: () => FlutterBlue.instance.startScan(timeout: const Duration(seconds: 4)));
+                child: const Icon(Icons.search), onPressed: () => FlutterBluePlus.instance.startScan(timeout: const Duration(seconds: 4)));
           }
         },
       ),

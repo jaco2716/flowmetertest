@@ -49,98 +49,102 @@ class _MyChartState extends State<MyChart> {
         chartValues[selectTypeListProvider.indexSelected].reduce((curr, next) => curr.y > next.y ? curr : next).y;
     chartIndex++;
 
-    return AspectRatio(
-      // aspectRatio: 0.8,
-      aspectRatio: 1,
-      child: Container(
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(
-            Radius.circular(18),
-          ),
-          // color: Color(0xff232d37),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(right: 4.0, left: 6.0, top: 8, bottom: 8),
-          child: LineChart(
-            LineChartData(
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: true,
-                horizontalInterval: calculateInterval(maxY[selectTypeListProvider.indexSelected], minY[selectTypeListProvider.indexSelected]),
-                verticalInterval: 1,
-                getDrawingHorizontalLine: (value) {
-                  return FlLine(
-                    color: const Color(0xff37434d),
-                    strokeWidth: 1,
-                  );
-                },
-                getDrawingVerticalLine: (value) {
-                  return FlLine(
-                    color: const Color(0xff37434d),
-                    strokeWidth: 1,
-                  );
-                },
+    return Stack(
+      children: [
+        AspectRatio(
+          // aspectRatio: 0.8,
+          aspectRatio: 1,
+          child: Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(
+                Radius.circular(18),
               ),
-              titlesData: FlTitlesData(
-                show: true,
-                rightTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                topTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                bottomTitles: AxisTitles(
-                  axisNameWidget: const Text(
-                    'Time',
-                    style: TextStyle(color: Colors.white54, fontSize: 16),
-                  ),
-                  axisNameSize: 30,
-                ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    // interval: (maxY.ceil() + 1) / 4,
-                    interval: calculateInterval(maxY[selectTypeListProvider.indexSelected], minY[selectTypeListProvider.indexSelected]),
-                    getTitlesWidget: leftTitleWidgets,
-                    reservedSize: 42,
-                  ),
-                ),
-              ),
-              borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xff37434d), width: 1)),
-              minX: chartValues[selectTypeListProvider.indexSelected].first.x,
-              maxX: chartValues[selectTypeListProvider.indexSelected].first.x + 60, //60 secounds of data
-              // minY = min - difference from max to min divided by 10, with .5 margin
-              minY: minY[selectTypeListProvider.indexSelected] -
-                  ((maxY[selectTypeListProvider.indexSelected] - minY[selectTypeListProvider.indexSelected]) / 10 + .5),
-              // minX = min + difference from max to min divided by 10, with .5 margin
-              maxY: maxY[selectTypeListProvider.indexSelected] +
-                  ((maxY[selectTypeListProvider.indexSelected] - minY[selectTypeListProvider.indexSelected]) / 10 + .5),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: chartValues[selectTypeListProvider.indexSelected],
-                  isCurved: true,
-                  gradient: LinearGradient(
-                    colors: gradientColors,
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  barWidth: 2,
-                  isStrokeCapRound: true,
-                  dotData: FlDotData(show: false),
-                  belowBarData: BarAreaData(
+              // color: Color(0xff232d37),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 4.0, left: 6.0, top: 8, bottom: 8),
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
                     show: true,
-                    gradient: LinearGradient(
-                      colors: gradientColors.map((color) => color.withOpacity(0.3)).toList(),
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                    drawVerticalLine: true,
+                    horizontalInterval: calculateInterval(maxY[selectTypeListProvider.indexSelected], minY[selectTypeListProvider.indexSelected]),
+                    verticalInterval: 1,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: const Color(0xff37434d),
+                        strokeWidth: 1,
+                      );
+                    },
+                    getDrawingVerticalLine: (value) {
+                      return FlLine(
+                        color: const Color(0xff37434d),
+                        strokeWidth: 1,
+                      );
+                    },
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      axisNameWidget: const Text(
+                        'Time',
+                        style: TextStyle(color: Colors.white54, fontSize: 16),
+                      ),
+                      axisNameSize: 30,
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        // interval: (maxY.ceil() + 1) / 4,
+                        interval: calculateInterval(maxY[selectTypeListProvider.indexSelected], minY[selectTypeListProvider.indexSelected]),
+                        getTitlesWidget: leftTitleWidgets,
+                        reservedSize: 42,
+                      ),
                     ),
                   ),
+                  borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xff37434d), width: 1)),
+                  minX: chartValues[selectTypeListProvider.indexSelected].first.x,
+                  maxX: chartValues[selectTypeListProvider.indexSelected].first.x + 60, //60 secounds of data
+                  // minY = min - difference from max to min divided by 10, with .5 margin
+                  minY: minY[selectTypeListProvider.indexSelected] -
+                      ((maxY[selectTypeListProvider.indexSelected] - minY[selectTypeListProvider.indexSelected]) / 10 + .5),
+                  // minX = min + difference from max to min divided by 10, with .5 margin
+                  maxY: maxY[selectTypeListProvider.indexSelected] +
+                      ((maxY[selectTypeListProvider.indexSelected] - minY[selectTypeListProvider.indexSelected]) / 10 + .5),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: chartValues[selectTypeListProvider.indexSelected],
+                      isCurved: true,
+                      gradient: LinearGradient(
+                        colors: gradientColors,
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      barWidth: 2,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          colors: gradientColors.map((color) => color.withOpacity(0.3)).toList(),
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 

@@ -9,6 +9,10 @@ class SelectTypeListProvider extends ChangeNotifier {
     indexSelected = index;
     notifyListeners();
   }
+
+  void updatetest() {
+    notifyListeners();
+  }
 }
 
 class SelectType {

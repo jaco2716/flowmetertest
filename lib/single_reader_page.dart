@@ -5,7 +5,8 @@ import 'package:flowprotest/widgets/my_chart.dart';
 import 'package:flowprotest/widgets/my_scrollview_w_constraints.dart';
 import 'package:flowprotest/single_chart_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:gauges/gauges.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +38,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
   bool isNotifying = true;
 
   void setupService() async {
+    print('Setup!!!');
     //Time setup
     int timeServiceIndex = widget.services.indexWhere((element) => element.uuid.toString() == '00001805-0000-1000-8000-00805f9b34fb');
     if (timeServiceIndex != -1) timeService = widget.services[timeServiceIndex];
@@ -65,7 +67,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
       DateTime deviceDate = DateTime(yearValue, bytes[2], bytes[3], bytes[4], bytes[5], bytes[6]);
       var dateNow = DateTime.now();
       if (dateNow.difference(deviceDate).inMinutes > 2) {
-        setDeviceTime();
+        await setDeviceTime();
       }
     }
     await timeCharacteristic?.setNotifyValue(isNotifying);
@@ -89,6 +91,7 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('new state!!!');
     // if (dateData.length > 4) {
     // int byteI = 18;
     // print('${dateData[0].sublist(1, 3)}- i=$byteI: ${dateData[0].sublist(byteI)}');
@@ -114,197 +117,216 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          IconButton(
-              onPressed: () {
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => SingleChartPage(
-                //                 combinedStreams: CombineLatestStream.list([
-                //               pressureCharacteristic!.value,
-                //               barometerCharacteristic!.value,
-                //               flowCharacteristic!.value,
-                //             ]))));
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => DataTestingPage(
-                            dataService: dataService!,
-                            timeService: timeService!,
-                            pressureCharacteristic: pressureCharacteristic!,
-                            flowCharacteristic: flowCharacteristic!,
-                            timeCharacteristic: timeCharacteristic!)));
-              },
-              icon: const Icon(Icons.line_style))
-        ],
+        // actions: [
+        //   IconButton(
+        //       onPressed: () {
+        //         // Navigator.push(
+        //         //     context,
+        //         //     MaterialPageRoute(
+        //         //         builder: (context) => SingleChartPage(
+        //         //                 combinedStreams: CombineLatestStream.list([
+        //         //               pressureCharacteristic!.value,
+        //         //               barometerCharacteristic!.value,
+        //         //               flowCharacteristic!.value,
+        //         //             ]))));
+        //         Navigator.push(
+        //             context,
+        //             MaterialPageRoute(
+        //                 builder: (context) => DataTestingPage(
+        //                     dataService: dataService!,
+        //                     timeService: timeService!,
+        //                     pressureCharacteristic: pressureCharacteristic!,
+        //                     flowCharacteristic: flowCharacteristic!,
+        //                     timeCharacteristic: timeCharacteristic!)));
+        //       },
+        //       icon: const Icon(Icons.line_style))
+        // ],
       ),
       body: ChangeNotifierProvider(
           create: (context) => SelectTypeListProvider([
                 SelectType(0, 'Gas Flow - CFH'),
                 SelectType(1, 'Pressure - PSI'),
               ]),
-          builder: (context, child) {
-            var selectTypeListProvider = Provider.of<SelectTypeListProvider>(context);
+          child:
+              // builder: (context, child) {
+              //   var selectTypeListProvider = Provider.of<SelectTypeListProvider>(context);
 
-            return MyScrollviewWConstraints(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: StreamBuilder<List<List<int>>>(
-                        // stream: pressureCharacteristic?.value,
-                        stream: CombineLatestStream.list([
-                          timeCharacteristic!.value,
-                          pressureCharacteristic!.value,
-                          barometerCharacteristic!.value,
-                          flowCharacteristic!.value,
-                          temperatureCharacteristic!.value,
-                        ]),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            if (snapshot.data?[0].length != 10 ||
-                                snapshot.data?[1].length != 4 ||
-                                snapshot.data?[2].length != 4 ||
-                                snapshot.data?[3].length != 4 ||
-                                snapshot.data?[4].length != 2) {
-                              print('loading');
-                              return const SizedBox(height: 150, width: 150, child: Center(child: CircularProgressIndicator()));
-                              // return const SizedBox(height: 250, width: 250, child: Center(child: Text('No data')));
-                            }
-                            var timeBytes = Uint8List.fromList(snapshot.data![0]);
-                            var yearValue = ByteData.view(timeBytes.buffer).getInt16(0, Endian.little);
-                            DateTime date = DateTime(yearValue, timeBytes[2], timeBytes[3], timeBytes[4], timeBytes[5], timeBytes[6]);
-                            var dfTime = DateFormat('HH:mm');
-                            var dfDate = DateFormat('dd/MM/yyyy');
+              //   return
+              MyScrollviewWConstraints(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // ElevatedButton(
+                //     onPressed: () {
+                //       selectTypeListProvider.updatetest();
+                //     },
+                //     child: Text('s')),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: StreamBuilder<List<List<int>>>(
+                      // stream: pressureCharacteristic?.value,
+                      stream: CombineLatestStream.list([
+                        timeCharacteristic!.value,
+                        pressureCharacteristic!.value,
+                        barometerCharacteristic!.value,
+                        flowCharacteristic!.value,
+                        temperatureCharacteristic!.value,
+                      ]),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          if (snapshot.data?[0].length != 10 ||
+                              snapshot.data?[1].length != 4 ||
+                              snapshot.data?[2].length != 4 ||
+                              snapshot.data?[3].length != 4 ||
+                              snapshot.data?[4].length != 2) {
+                            print(snapshot.data?[0].length);
+                            print(snapshot.data?[1].length);
+                            print(snapshot.data?[2].length);
+                            print(snapshot.data?[3].length);
+                            print(snapshot.data?[4].length);
 
-                            var barometerBytes = Uint8List.fromList(snapshot.data![2]);
-                            var barometerData = ByteData.view(barometerBytes.buffer).getInt32(0, Endian.little);
-                            var barometerValue = ByteData.view(barometerBytes.buffer).getInt32(0, Endian.little) * 0.00002952998015649;
-                            var pressureBytes = Uint8List.fromList(snapshot.data![1]);
-                            var pressureData = ByteData.view(pressureBytes.buffer).getInt32(0, Endian.little);
-                            var pressureValue = (pressureData - barometerData).toDouble() * 0.00040146303904694;
-                            var temperatureBytes = Uint8List.fromList(snapshot.data![4]);
-                            var temperatureValue = ByteData.view(temperatureBytes.buffer).getInt16(0, Endian.little);
-                            var flowBytes = Uint8List.fromList(snapshot.data![3]);
-                            var flowData = ByteData.view(flowBytes.buffer).getInt32(0, Endian.little);
-                            // var flowValue = ((flowData * (1545 / 28.964) * ((((temperatureValue / 100) * 9 / 5) + 32) + 460)) /
-                            //         (144 * (pressureData * 0.00002952998015649))) /
-                            //     60;
-                            var flowValue = flowData / 100;
-
-                            // print('//bytes');
-                            // print(pressureBytes);
-                            // print(barometerBytes);
-                            // print(flowBytes);
-                            // print(numberValue);
-                            //1012376
-                            //1084960
-                            //TODO udregning
-                            // numbervalue - BarometerValue * in/H20
-                            //TODO !!! Flow bliver udreget ved hjælp af temperatur og pressure??
-                            return Column(
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          dfTime.format(date),
-                                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          dfDate.format(date),
-                                          style: const TextStyle(fontSize: 11, color: Colors.white60),
-                                        ),
-                                      ],
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Icon(Icons.menu, color: Colors.grey),
-                                    ),
-                                    Column(
-                                      children: [
-                                        Text(
-                                          '${(((temperatureValue / 100) * 9 / 5) + 32).toStringAsFixed(2)}°',
-                                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                        ),
-                                        const Text(
-                                          'Farenheit',
-                                          style: TextStyle(fontSize: 11, color: Colors.white60),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                                MyDropdownButton(selectTypeListProvider: selectTypeListProvider),
-                                const SizedBox(height: 20),
-                                selectTypeListProvider.indexSelected == 0
-                                    ? DetailGaugeDial(
-                                        value: flowValue,
-                                        isPressure: false,
-                                        title: 'Flow',
-                                        messureUnit: 'CFH',
-                                      )
-                                    : Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          DetailGaugeDial(
-                                            value: pressureValue,
-                                            // value: (((pressureValue - barometerValue).toDouble() * 0.00040146303904694)),
-                                            isPressure: true,
-                                            title: 'Pressure',
-                                            messureUnit: 'PSI',
-                                          ),
-                                          const SizedBox(width: 20),
-                                          DetailGaugeDial(
-                                            value: barometerValue,
-                                            isPressure: true,
-                                            title: 'Barometer',
-                                            messureUnit: 'PSI',
-                                            start2: 25,
-                                            start3: 35,
-                                            end: 60,
-                                          ),
-                                        ],
-                                      ),
-                                const Divider(),
-                                MyChart(flowValue: flowValue, pressureValue: pressureValue),
-                              ],
-                            );
-                          } else if (snapshot.hasError) {
-                            // TODO: do something with the error
-                            return SizedBox(height: 250, width: 250, child: Text(snapshot.error.toString()));
+                            print('loading');
+                            return const SizedBox(height: 150, width: 150, child: Center(child: CircularProgressIndicator()));
+                            // return const SizedBox(height: 250, width: 250, child: Center(child: Text('No data')));
                           }
-                          // TODO: the data is not ready, show a loading indicator
-                          return const SizedBox(height: 250, width: 250, child: Center(child: CircularProgressIndicator()));
-                        }),
-                  ),
-                  // ElevatedButton(
-                  //     onPressed: () {
-                  //       Navigator.push(
-                  //           context,
-                  //           MaterialPageRoute(
-                  //               builder: (context) => DataTestingPage(
-                  //                   dataService: dataService!,
-                  //                   timeService: timeService!,
-                  //                   pressureCharacteristic: pressureCharacteristic!,
-                  //                   flowCharacteristic: flowCharacteristic!,
-                  //                   timeCharacteristic: timeCharacteristic!)));
-                  //     },
-                  //     child: const Text('   Data Testing   ')),
-                ],
-              ),
-            );
-          }),
+                          var timeBytes = Uint8List.fromList(snapshot.data![0]);
+                          var yearValue = ByteData.view(timeBytes.buffer).getInt16(0, Endian.little);
+                          DateTime date = DateTime(yearValue, timeBytes[2], timeBytes[3], timeBytes[4], timeBytes[5], timeBytes[6]);
+                          var dfTime = DateFormat('HH:mm');
+                          var dfDate = DateFormat('dd/MM/yyyy');
+
+                          var barometerBytes = Uint8List.fromList(snapshot.data![2]);
+                          var barometerData = ByteData.view(barometerBytes.buffer).getInt32(0, Endian.little);
+                          var barometerValue = ByteData.view(barometerBytes.buffer).getInt32(0, Endian.little) * 0.00002952998015649;
+                          var pressureBytes = Uint8List.fromList(snapshot.data![1]);
+                          var pressureData = ByteData.view(pressureBytes.buffer).getInt32(0, Endian.little);
+                          var pressureValue = (pressureData - barometerData).toDouble() * 0.00040146303904694;
+                          var temperatureBytes = Uint8List.fromList(snapshot.data![4]);
+                          var temperatureValue = ByteData.view(temperatureBytes.buffer).getInt16(0, Endian.little);
+                          var flowBytes = Uint8List.fromList(snapshot.data![3]);
+                          var flowData = ByteData.view(flowBytes.buffer).getInt32(0, Endian.little);
+                          // var flowValue = ((flowData * (1545 / 28.964) * ((((temperatureValue / 100) * 9 / 5) + 32) + 460)) /
+                          //         (144 * (pressureData * 0.00002952998015649))) /
+                          //     60;
+                          var flowValue = flowData / 100;
+
+                          // print('//bytes');
+                          // print(pressureBytes);
+                          // print(barometerBytes);
+                          // print(flowBytes);
+                          // print(numberValue);
+                          //1012376
+                          //1084960
+                          //TODO udregning
+                          // numbervalue - BarometerValue * in/H20
+                          //TODO !!! Flow bliver udreget ved hjælp af temperatur og pressure??
+                          return Column(
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        dfTime.format(date),
+                                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        dfDate.format(date),
+                                        style: const TextStyle(fontSize: 11, color: Colors.white60),
+                                      ),
+                                    ],
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(Icons.menu, color: Colors.grey),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        '${(((temperatureValue / 100) * 9 / 5) + 32).toStringAsFixed(2)}°',
+                                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                      ),
+                                      const Text(
+                                        'Farenheit',
+                                        style: TextStyle(fontSize: 11, color: Colors.white60),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                              // MyDropdownButton(selectTypeListProvider: selectTypeListProvider),
+                              MyDropdownButton(selectTypeListProvider: context.read<SelectTypeListProvider>()),
+                              const SizedBox(height: 20),
+                              Consumer<SelectTypeListProvider>(
+                                builder: (context, value, child) {
+                                  if (value.indexSelected == 0) {
+                                    return DetailGaugeDial(
+                                      value: flowValue,
+                                      isPressure: false,
+                                      title: 'Flow',
+                                      messureUnit: 'CFH',
+                                    );
+                                  } else {
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        DetailGaugeDial(
+                                          value: pressureValue,
+                                          // value: (((pressureValue - barometerValue).toDouble() * 0.00040146303904694)),
+                                          isPressure: true,
+                                          title: 'Pressure',
+                                          messureUnit: 'inH2O',
+                                        ),
+                                        const SizedBox(width: 20),
+                                        DetailGaugeDial(
+                                          value: barometerValue,
+                                          isPressure: true,
+                                          title: 'Barometer',
+                                          messureUnit: 'inHg',
+                                          start2: 25,
+                                          start3: 35,
+                                          end: 60,
+                                        ),
+                                      ],
+                                    );
+                                  }
+                                },
+                              ),
+                              const Divider(),
+                              MyChart(flowValue: flowValue, pressureValue: pressureValue),
+                            ],
+                          );
+                        } else if (snapshot.hasError) {
+                          // TODO: do something with the error
+                          return SizedBox(height: 250, width: 250, child: Text(snapshot.error.toString()));
+                        }
+                        // TODO: the data is not ready, show a loading indicator
+                        return const SizedBox(height: 250, width: 250, child: Center(child: CircularProgressIndicator()));
+                      }),
+                ),
+                // ElevatedButton(
+                //     onPressed: () {
+                //       Navigator.push(
+                //           context,
+                //           MaterialPageRoute(
+                //               builder: (context) => DataTestingPage(
+                //                   dataService: dataService!,
+                //                   timeService: timeService!,
+                //                   pressureCharacteristic: pressureCharacteristic!,
+                //                   flowCharacteristic: flowCharacteristic!,
+                //                   timeCharacteristic: timeCharacteristic!)));
+                //     },
+                //     child: const Text('   Data Testing   ')),
+              ],
+            ),
+          )),
     );
   }
 
-  setDeviceTime() async {
+  Future<void> setDeviceTime() async {
     try {
       DateTime timeNow = DateTime.now();
       var yearByte = Uint8List(2)..buffer.asInt16List()[0] = timeNow.year;
