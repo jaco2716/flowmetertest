@@ -1,17 +1,13 @@
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:flowprotest/data_testing_page.dart';
 import 'package:flowprotest/widgets/my_chart.dart';
 import 'package:flowprotest/widgets/my_scrollview_w_constraints.dart';
-import 'package:flowprotest/single_chart_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:gauges/gauges.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-
 import 'model/providers/select_type_provider.dart';
 import 'widgets/my_dropdown_button.dart';
 
@@ -38,7 +34,6 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
   bool isNotifying = true;
 
   void setupService() async {
-    print('Setup!!!');
     //Time setup
     int timeServiceIndex = widget.services.indexWhere((element) => element.uuid.toString() == '00001805-0000-1000-8000-00805f9b34fb');
     if (timeServiceIndex != -1) timeService = widget.services[timeServiceIndex];
@@ -91,7 +86,6 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('new state!!!');
     // if (dateData.length > 4) {
     // int byteI = 18;
     // print('${dateData[0].sublist(1, 3)}- i=$byteI: ${dateData[0].sublist(byteI)}');
@@ -180,13 +174,6 @@ class _SingleReaderPageState extends State<SingleReaderPage> {
                               snapshot.data?[2].length != 4 ||
                               snapshot.data?[3].length != 4 ||
                               snapshot.data?[4].length != 2) {
-                            print(snapshot.data?[0].length);
-                            print(snapshot.data?[1].length);
-                            print(snapshot.data?[2].length);
-                            print(snapshot.data?[3].length);
-                            print(snapshot.data?[4].length);
-
-                            print('loading');
                             return const SizedBox(height: 150, width: 150, child: Center(child: CircularProgressIndicator()));
                             // return const SizedBox(height: 250, width: 250, child: Center(child: Text('No data')));
                           }
